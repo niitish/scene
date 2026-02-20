@@ -1,11 +1,10 @@
 import os
 import uuid
+from datetime import datetime
+from http import HTTPStatus
 
 import aiofiles
 import aiofiles.os
-from http import HTTPStatus
-from datetime import datetime
-
 from fastapi import APIRouter, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import select
@@ -15,7 +14,6 @@ from app.db import SessionDep
 from app.db.model import Image, ServiceQ
 from app.enums import ServiceType
 from app.logger import logger
-
 
 router = APIRouter()
 
@@ -194,4 +192,30 @@ async def get_image(image_id: uuid.UUID, session: SessionDep):
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Error getting image",
+        )
+
+
+@router.get("/{image_id}/thumb")
+async def get_thumb(image_id: uuid.UUID, session: SessionDep):
+    try:
+        image = await session.get(Image, image_id)
+        if not image:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND, detail="Image not found"
+            )
+
+        if not image.thumb:
+            return FileResponse(image.path)
+
+        return FileResponse(image.thumb)
+
+    except HTTPException as e:
+        logger.error(f"Error getting thumb {image_id}: {e.detail}")
+        raise
+
+    except Exception as e:
+        logger.error(f"Error getting thumb {image_id}: {e}")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error getting thumb",
         )

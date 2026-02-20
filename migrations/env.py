@@ -2,13 +2,12 @@ import asyncio
 import os
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-
-from alembic import context
-
 from sqlmodel import SQLModel
+
 import app.db.model  # noqa: F401 - ensure models are registered on SQLModel.metadata
 
 config = context.config

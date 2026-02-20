@@ -10,6 +10,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "fastapi[standard]>=0.129.0",
     "pgvector>=0.4.2",
+    "pillow>=12.1.1",
     "python-multipart>=0.0.22",
     "sqlmodel>=0.0.34",
 ]

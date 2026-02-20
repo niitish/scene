@@ -15,7 +15,7 @@ class Image(SQLModel, table=True):
     thumb: str
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime = Field(default=datetime.now())
-    tags: list[str] = Field(default=[], sa_type=ARRAY(String))
+    tags: list[str] = Field(default=[], sa_type=ARRAY[str](String))
     embeddings: Any | None = Field(sa_type=VECTOR(3), default=None)
 
 
@@ -24,5 +24,7 @@ class ServiceQ(SQLModel, table=True):
     image_id: uuid.UUID = Field(foreign_key="image.id")
     service_type: ServiceType
     status: ServiceStatus = Field(default=ServiceStatus.PENDING)
+    attempts: int = Field(default=0)
+    max_attempts: int = Field(default=3)
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime = Field(default=datetime.now())

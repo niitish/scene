@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+worker.log
 
 # Virtual environments
 .venv

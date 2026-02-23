@@ -1,3 +1,4 @@
+import asyncio
 import os
 import uuid
 from datetime import datetime
@@ -9,17 +10,50 @@ from fastapi import APIRouter, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import select
 
-from app.constants import ALLOWED_IMAGE_EXTENSIONS, UPLOAD_DIR
+from app.constants import (
+    ALLOWED_IMAGE_EXTENSIONS,
+    SIMILARITY_THRESHOLD,
+    TEXT_SIMILARITY_THRESHOLD,
+    UPLOAD_DIR,
+)
 from app.db import SessionDep
 from app.db.model import Image, ServiceQ
 from app.enums import ServiceType
 from app.logger import logger
+from app.schemas import (
+    DeleteResponse,
+    ErrorResponse,
+    ImageMeta,
+    ImageWithSimilarity,
+    ListResponse,
+    UploadResponse,
+)
+from app.worker.vector import generate_text_vector
 
 router = APIRouter()
 
+_ERRORS = {
+    400: {"model": ErrorResponse},
+    404: {"model": ErrorResponse},
+    422: {"model": ErrorResponse},
+    500: {"model": ErrorResponse},
+}
 
-@router.post("/")
-async def upload_file(file: UploadFile, session: SessionDep):
+
+_IMAGE_COLS = (
+    Image.id,
+    Image.name,
+    Image.path,
+    Image.thumb,
+    Image.created_at,
+    Image.updated_at,
+    Image.tags,
+)
+
+
+@router.post("/", responses={400: _ERRORS[400], 500: _ERRORS[500]})
+async def upload_file(file: UploadFile, session: SessionDep) -> UploadResponse:
+    file_path = None
     try:
         if file.content_type not in ALLOWED_IMAGE_EXTENSIONS:
             raise HTTPException(
@@ -29,7 +63,8 @@ async def upload_file(file: UploadFile, session: SessionDep):
 
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-        ext = os.path.splitext(file.filename or "")[-1]
+        raw_ext = os.path.splitext(os.path.basename(file.filename or ""))[-1].lower()
+        ext = raw_ext if raw_ext.lstrip(".").isalpha() else ""
         unique_filename = f"{uuid.uuid7().hex}{ext}"
         file_path = os.path.join(UPLOAD_DIR, unique_filename)
 
@@ -38,20 +73,17 @@ async def upload_file(file: UploadFile, session: SessionDep):
             await buffer.write(content)
 
         image = Image(
-            name=file.filename or unique_filename, path=file_path, thumb=file_path
+            name=file.filename or unique_filename,
+            path=file_path,
         )
         session.add(image)
+        await session.flush()
+
+        session.add(ServiceQ(image_id=image.id, service_type=ServiceType.THUMB))
         await session.commit()
         await session.refresh(image)
 
-        for service_type in ServiceType:
-            session.add(ServiceQ(image_id=image.id, service_type=service_type))
-        await session.commit()
-
-        return {
-            "image_id": image.id,
-            "path": file_path,
-        }
+        return {"image_id": image.id, "path": file_path}
 
     except HTTPException as e:
         logger.error(f"Error uploading image: {e.detail}")
@@ -60,7 +92,8 @@ async def upload_file(file: UploadFile, session: SessionDep):
     except Exception as e:
         await session.rollback()
         try:
-            await aiofiles.os.remove(file_path)
+            if file_path is not None:
+                await aiofiles.os.remove(file_path)
         except Exception:
             pass
         logger.error(f"Error uploading image: {e}")
@@ -69,12 +102,12 @@ async def upload_file(file: UploadFile, session: SessionDep):
         )
 
 
-@router.get("/list")
+@router.get("/list", responses={400: _ERRORS[400], 500: _ERRORS[500]})
 async def list_files(
     session: SessionDep,
     page: int = 1,
     page_size: int = 20,
-):
+) -> ListResponse:
     try:
         if page < 1:
             raise HTTPException(
@@ -87,8 +120,10 @@ async def list_files(
             )
 
         offset = (page - 1) * page_size
-        result = await session.exec(select(Image).offset(offset).limit(page_size))
-        images = result.all()
+        result = await session.exec(
+            select(*_IMAGE_COLS).offset(offset).limit(page_size)
+        )
+        images = result.mappings().all()
 
         return {"page": page, "page_size": page_size, "items": images}
 
@@ -106,13 +141,13 @@ async def list_files(
         )
 
 
-@router.patch("/{image_id}")
+@router.patch("/{image_id}", responses={404: _ERRORS[404], 500: _ERRORS[500]})
 async def update_file(
     image_id: uuid.UUID,
     session: SessionDep,
     name: str | None = None,
     tags: list[str] | None = None,
-):
+) -> ImageMeta:
     try:
         image = await session.get(Image, image_id)
         if not image:
@@ -143,8 +178,8 @@ async def update_file(
         )
 
 
-@router.delete("/{image_id}")
-async def delete_file(image_id: uuid.UUID, session: SessionDep):
+@router.delete("/{image_id}", responses={404: _ERRORS[404], 500: _ERRORS[500]})
+async def delete_file(image_id: uuid.UUID, session: SessionDep) -> DeleteResponse:
     try:
         image = await session.get(Image, image_id)
         if not image:
@@ -154,6 +189,8 @@ async def delete_file(image_id: uuid.UUID, session: SessionDep):
 
         try:
             await aiofiles.os.remove(image.path)
+            if image.thumb:
+                await aiofiles.os.remove(image.thumb)
         except FileNotFoundError:
             pass
 
@@ -173,8 +210,40 @@ async def delete_file(image_id: uuid.UUID, session: SessionDep):
         )
 
 
-@router.get("/{image_id}/")
-async def get_image(image_id: uuid.UUID, session: SessionDep):
+@router.get("/search", responses={500: _ERRORS[500]})
+async def search_images(
+    query: str, session: SessionDep, page: int = 1, page_size: int = 10
+) -> list[ImageWithSimilarity]:
+    try:
+        text_embeddings = await asyncio.to_thread(generate_text_vector, query)
+        distance = Image.embeddings.cosine_distance(text_embeddings)
+        similarity = (1 - distance).label("similarity")
+        results = await session.exec(
+            select(*_IMAGE_COLS, similarity)
+            .where(distance < TEXT_SIMILARITY_THRESHOLD)
+            .order_by(distance)
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        rows = results.mappings().all()
+        return [
+            {**row, "similarity": round(float(row["similarity"]), 4)} for row in rows
+        ]
+
+    except HTTPException as e:
+        logger.error(f"Error searching images {query}: {e.detail}")
+        raise
+
+    except Exception as e:
+        logger.error(f"Error searching images {query}: {e}")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error searching images",
+        )
+
+
+@router.get("/{image_id}/", responses={404: _ERRORS[404], 500: _ERRORS[500]})
+async def get_image(image_id: uuid.UUID, session: SessionDep) -> FileResponse:
     try:
         image = await session.get(Image, image_id)
         if not image:
@@ -195,8 +264,8 @@ async def get_image(image_id: uuid.UUID, session: SessionDep):
         )
 
 
-@router.get("/{image_id}/thumb")
-async def get_thumb(image_id: uuid.UUID, session: SessionDep):
+@router.get("/{image_id}/thumb", responses={404: _ERRORS[404], 500: _ERRORS[500]})
+async def get_thumb(image_id: uuid.UUID, session: SessionDep) -> FileResponse:
     try:
         image = await session.get(Image, image_id)
         if not image:
@@ -218,4 +287,50 @@ async def get_thumb(image_id: uuid.UUID, session: SessionDep):
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Error getting thumb",
+        )
+
+
+@router.get(
+    "/{image_id}/similar",
+    responses={404: _ERRORS[404], 422: _ERRORS[422], 500: _ERRORS[500]},
+)
+async def get_similar(
+    image_id: uuid.UUID, session: SessionDep, page: int = 1, page_size: int = 10
+) -> list[ImageWithSimilarity]:
+    try:
+        image = await session.get(Image, image_id)
+        if not image:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND, detail="Image not found"
+            )
+
+        if image.embeddings is None:
+            raise HTTPException(
+                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                detail="Image has not been embedded yet",
+            )
+
+        distance = Image.embeddings.cosine_distance(image.embeddings)
+        similarity = (1 - distance).label("similarity")
+        results = await session.exec(
+            select(*_IMAGE_COLS, similarity)
+            .where(distance < SIMILARITY_THRESHOLD)
+            .order_by(distance)
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
+        rows = results.mappings().all()
+        return [
+            {**row, "similarity": round(float(row["similarity"]), 4)} for row in rows
+        ]
+
+    except HTTPException as e:
+        logger.error(f"Error getting similar images {image_id}: {e.detail}")
+        raise
+
+    except Exception as e:
+        logger.error(f"Error getting similar images {image_id}: {e}")
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail="Error getting similar images",
         )

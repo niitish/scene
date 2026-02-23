@@ -1,12 +1,14 @@
 import asyncio
 import logging
+import uuid
+from datetime import datetime
 
 from sqlalchemy import text
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.constants import MAX_CONCURRENT_JOBS, POLL_INTERVAL
 from app.db import async_session
-from app.db.model import Image
+from app.db.model import Image, ServiceQ
 from app.enums import ServiceStatus, ServiceType
 from app.worker.detect import detect_objects
 from app.worker.thumb import generate_thumb
@@ -42,16 +44,30 @@ async def _dequeue(session: AsyncSession) -> dict | None:
     )
     await session.commit()
     row = result.fetchone()
-    return dict(row._mapping) if row else None
+    if row is None:
+        return None
+    return {
+        "id": row[0],
+        "image_id": row[1],
+        "service_type": row[2],
+        "attempts": row[3],
+        "max_attempts": row[4],
+    }
 
 
-async def _mark_done(session: AsyncSession, job_id, success: bool) -> None:
-    status = ServiceStatus.COMPLETED if success else ServiceStatus.FAILED
+async def _mark_done(session: AsyncSession, job_id: uuid.UUID, success: bool) -> None:
     await session.exec(
-        text("UPDATE serviceq SET status = :s, updated_at = NOW() WHERE id = :id")
-        .bindparams(s=status, id=job_id)
+        text("""
+            UPDATE serviceq
+            SET status = CASE
+                WHEN :success THEN 'COMPLETED'::servicestatus
+                WHEN attempts >= max_attempts THEN 'FAILED'::servicestatus
+                ELSE 'PENDING'::servicestatus
+            END,
+            updated_at = NOW()
+            WHERE id = :id
+        """).bindparams(success=success, id=job_id)
     )
-    await session.commit()
 
 
 async def _handle_job(job: dict) -> None:
@@ -67,19 +83,59 @@ async def _handle_job(job: dict) -> None:
                             )
                         thumb_path = await asyncio.to_thread(generate_thumb, image.path)
                         image.thumb = thumb_path
+                        image.updated_at = datetime.now()
                         session.add(image)
+                        session.add(
+                            ServiceQ(
+                                image_id=job["image_id"],
+                                service_type=ServiceType.VECTOR,
+                                status=ServiceStatus.PENDING,
+                            )
+                        )
+                        await _mark_done(session, job["id"], success=True)
                         await session.commit()
+                        return
 
                     case ServiceType.VECTOR:
-                        await asyncio.to_thread(generate_vector, job)
+                        image = await session.get(Image, job["image_id"])
+                        if image is None:
+                            raise ValueError(
+                                f"VECTOR: Image {job['image_id']} not found"
+                            )
+                        if image.thumb is None:
+                            raise ValueError(
+                                f"VECTOR: Image {job['image_id']} has no thumbnail yet"
+                            )
+                        embeddings = await asyncio.to_thread(
+                            generate_vector, image.thumb
+                        )
+                        image.embeddings = embeddings
+                        image.updated_at = datetime.now()
+                        session.add(image)
+
+                        # TODO: add a new serviceq for the detector
+
+                        await _mark_done(session, job["id"], success=True)
+                        await session.commit()
+                        return
+
                     case ServiceType.DETECTOR:
                         await asyncio.to_thread(detect_objects, job)
+                        await _mark_done(session, job["id"], success=True)
+                        await session.commit()
+                        return
+
                     case _:
                         logger.warning("Unknown service_type: %s", job["service_type"])
-                await _mark_done(session, job["id"], success=True)
+
             except Exception:
                 logger.exception("Job failed: %s", job)
-                await _mark_done(session, job["id"], success=False)
+                try:
+                    await session.rollback()
+                    await _mark_done(session, job["id"], success=False)
+                    await session.commit()
+                except Exception:
+                    logger.exception("Failed to mark job as done: %s", job["id"])
 
 
 _tasks: set[asyncio.Task] = set()
@@ -96,6 +152,9 @@ async def start_worker() -> None:
 
     try:
         while True:
+            await _sem.acquire()
+            _sem.release()
+
             async with async_session() as session:
                 job = await _dequeue(session)
 

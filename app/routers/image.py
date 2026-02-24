@@ -8,7 +8,7 @@ import aiofiles
 import aiofiles.os
 from fastapi import APIRouter, HTTPException, UploadFile
 from fastapi.responses import FileResponse
-from sqlmodel import select
+from sqlmodel import func, select
 
 from app.constants import (
     ALLOWED_IMAGE_EXTENSIONS,
@@ -24,8 +24,8 @@ from app.schemas import (
     DeleteResponse,
     ErrorResponse,
     ImageMeta,
-    ImageWithSimilarity,
     ListResponse,
+    SimilarityListResponse,
     UploadResponse,
 )
 from app.worker.vector import generate_text_vector
@@ -120,12 +120,15 @@ async def list_files(
             )
 
         offset = (page - 1) * page_size
+        count_result = await session.exec(select(func.count()).select_from(Image))
+        total = count_result.one()
+
         result = await session.exec(
             select(*_IMAGE_COLS).offset(offset).limit(page_size)
         )
         images = result.mappings().all()
 
-        return {"page": page, "page_size": page_size, "items": images}
+        return {"page": page, "page_size": page_size, "count": total, "items": images}
 
     except HTTPException as e:
         logger.error(
@@ -213,11 +216,19 @@ async def delete_file(image_id: uuid.UUID, session: SessionDep) -> DeleteRespons
 @router.get("/search", responses={500: _ERRORS[500]})
 async def search_images(
     query: str, session: SessionDep, page: int = 1, page_size: int = 10
-) -> list[ImageWithSimilarity]:
+) -> SimilarityListResponse:
     try:
         text_embeddings = await asyncio.to_thread(generate_text_vector, query)
         distance = Image.embeddings.cosine_distance(text_embeddings)
         similarity = (1 - distance).label("similarity")
+
+        count_result = await session.exec(
+            select(func.count())
+            .select_from(Image)
+            .where(distance < TEXT_SIMILARITY_THRESHOLD)
+        )
+        total = count_result.one()
+
         results = await session.exec(
             select(*_IMAGE_COLS, similarity)
             .where(distance < TEXT_SIMILARITY_THRESHOLD)
@@ -226,9 +237,10 @@ async def search_images(
             .limit(page_size)
         )
         rows = results.mappings().all()
-        return [
+        items = [
             {**row, "similarity": round(float(row["similarity"]), 4)} for row in rows
         ]
+        return {"page": page, "page_size": page_size, "count": total, "items": items}
 
     except HTTPException as e:
         logger.error(f"Error searching images {query}: {e.detail}")
@@ -296,7 +308,7 @@ async def get_thumb(image_id: uuid.UUID, session: SessionDep) -> FileResponse:
 )
 async def get_similar(
     image_id: uuid.UUID, session: SessionDep, page: int = 1, page_size: int = 10
-) -> list[ImageWithSimilarity]:
+) -> SimilarityListResponse:
     try:
         image = await session.get(Image, image_id)
         if not image:
@@ -312,6 +324,14 @@ async def get_similar(
 
         distance = Image.embeddings.cosine_distance(image.embeddings)
         similarity = (1 - distance).label("similarity")
+
+        count_result = await session.exec(
+            select(func.count())
+            .select_from(Image)
+            .where(distance < SIMILARITY_THRESHOLD)
+        )
+        total = count_result.one()
+
         results = await session.exec(
             select(*_IMAGE_COLS, similarity)
             .where(distance < SIMILARITY_THRESHOLD)
@@ -320,9 +340,10 @@ async def get_similar(
             .limit(page_size)
         )
         rows = results.mappings().all()
-        return [
+        items = [
             {**row, "similarity": round(float(row["similarity"]), 4)} for row in rows
         ]
+        return {"page": page, "page_size": page_size, "count": total, "items": items}
 
     except HTTPException as e:
         logger.error(f"Error getting similar images {image_id}: {e.detail}")

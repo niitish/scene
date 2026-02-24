@@ -26,7 +26,15 @@ class ImageWithSimilarity(ImageMeta):
 class ListResponse(BaseModel):
     page: int
     page_size: int
+    count: int
     items: list[ImageMeta]
+
+
+class SimilarityListResponse(BaseModel):
+    page: int
+    page_size: int
+    count: int
+    items: list[ImageWithSimilarity]
 
 
 class DeleteResponse(BaseModel):

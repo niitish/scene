@@ -37,6 +37,11 @@ class SimilarityListResponse(BaseModel):
     items: list[ImageWithSimilarity]
 
 
+class ImageUpdateRequest(BaseModel):
+    name: str | None = None
+    tags: list[str] | None = None
+
+
 class DeleteResponse(BaseModel):
     message: str
 

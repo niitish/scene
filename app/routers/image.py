@@ -24,6 +24,7 @@ from app.schemas import (
     DeleteResponse,
     ErrorResponse,
     ImageMeta,
+    ImageUpdateRequest,
     ListResponse,
     SimilarityListResponse,
     UploadResponse,
@@ -124,7 +125,7 @@ async def list_files(
         total = count_result.one()
 
         result = await session.exec(
-            select(*_IMAGE_COLS).offset(offset).limit(page_size)
+            select(*_IMAGE_COLS).order_by(Image.id).offset(offset).limit(page_size)
         )
         images = result.mappings().all()
 
@@ -148,8 +149,7 @@ async def list_files(
 async def update_file(
     image_id: uuid.UUID,
     session: SessionDep,
-    name: str | None = None,
-    tags: list[str] | None = None,
+    body: ImageUpdateRequest,
 ) -> ImageMeta:
     try:
         image = await session.get(Image, image_id)
@@ -158,10 +158,10 @@ async def update_file(
                 status_code=HTTPStatus.NOT_FOUND, detail="Image not found"
             )
 
-        if name is not None:
-            image.name = name
-        if tags is not None:
-            image.tags = tags
+        if body.name is not None:
+            image.name = body.name
+        if body.tags is not None:
+            image.tags = body.tags
         image.updated_at = datetime.now()
 
         session.add(image)
@@ -232,7 +232,7 @@ async def search_images(
         results = await session.exec(
             select(*_IMAGE_COLS, similarity)
             .where(distance < TEXT_SIMILARITY_THRESHOLD)
-            .order_by(distance)
+            .order_by(distance, Image.id)
             .offset((page - 1) * page_size)
             .limit(page_size)
         )
@@ -335,7 +335,7 @@ async def get_similar(
         results = await session.exec(
             select(*_IMAGE_COLS, similarity)
             .where(distance < SIMILARITY_THRESHOLD)
-            .order_by(distance)
+            .order_by(distance, Image.id)
             .offset((page - 1) * page_size)
             .limit(page_size)
         )

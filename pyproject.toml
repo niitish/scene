@@ -3,14 +3,14 @@ name = "scene"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = "==3.12.3"
 dependencies = [
     "aiofiles>=25.1.0",
     "alembic>=1.18.4",
     "asyncpg>=0.31.0",
     "fastapi[standard]>=0.129.0",
     "pgvector>=0.4.2",
-    "pillow>=12.1.1",
+    "pillow>=12.0.0",
     "python-multipart>=0.0.22",
     "sqlmodel>=0.0.34",
     "torch>=2.10.0",

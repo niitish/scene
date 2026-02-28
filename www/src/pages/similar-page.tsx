@@ -68,7 +68,7 @@ export function SimilarPage() {
         <img
           src={thumbUrl(imageId)}
           alt="Source image"
-          className="w-14 h-14 sm:w-20 sm:h-20 object-cover border border-black flex-shrink-0"
+          className="w-14 h-14 sm:w-20 sm:h-20 object-cover border border-black shrink-0"
         />
         <div className="min-w-0">
           <p className="font-black text-sm uppercase">Source Image</p>

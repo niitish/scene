@@ -36,7 +36,7 @@ export function ImagePreview({ image, onClose, onViewSimilar }: Props) {
         className="bg-white border border-black shadow-[6px_6px_0px_#1a1a1a] w-full sm:max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-black px-4 py-3 bg-yellow/60 flex-shrink-0">
+        <div className="flex items-center justify-between border-b border-black px-4 py-3 bg-yellow/60 shrink-0">
           <h2 className="font-semibold text-sm truncate pr-3">{image.name}</h2>
           <NeoButton variant="black" size="sm" onClick={onClose}>
             ✕

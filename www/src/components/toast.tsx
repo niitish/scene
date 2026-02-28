@@ -46,7 +46,7 @@ function ToastItem({ toast, onRemove }: { toast: ToastMessage; onRemove: (id: nu
 
 export function ToastContainer({ toasts, onRemove }: Props) {
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 w-72 sm:w-80">
+    <div className="fixed bottom-4 right-4 z-100 flex flex-col gap-2 w-72 sm:w-80">
       {toasts.map((t) => (
         <ToastItem key={t.id} toast={t} onRemove={onRemove} />
       ))}

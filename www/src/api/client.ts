@@ -1,6 +1,7 @@
 import type { DeleteResponse, ImageMeta, UploadResponse } from './types'
 
 const BASE = '/images'
+const AUTH_BASE = '/auth'
 
 export async function fetcher<T>(url: string): Promise<T> {
   const res = await fetch(url)
@@ -70,4 +71,20 @@ export async function deleteImage(imageId: string): Promise<DeleteResponse> {
     throw Object.assign(new Error(err.detail ?? 'Delete failed'), { status: res.status })
   }
   return res.json()
+}
+
+export function meKey() {
+  return `${AUTH_BASE}/me`
+}
+
+export async function logout(): Promise<void> {
+  await fetch(`${AUTH_BASE}/logout`, { method: 'POST' })
+}
+
+export function googleLoginUrl() {
+  return `${AUTH_BASE}/google/login`
+}
+
+export function githubLoginUrl() {
+  return `${AUTH_BASE}/github/login`
 }

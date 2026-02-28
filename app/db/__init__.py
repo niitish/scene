@@ -1,4 +1,3 @@
-import os
 from typing import Annotated
 
 from fastapi import Depends
@@ -6,9 +5,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/scene"
-)
+from app.constants import DATABASE_URL
 
 engine = create_async_engine(DATABASE_URL)
 

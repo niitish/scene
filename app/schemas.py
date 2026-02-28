@@ -1,16 +1,16 @@
-import uuid
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel
 
 
 class UploadResponse(BaseModel):
-    image_id: uuid.UUID
+    image_id: UUID
     path: str
 
 
 class ImageMeta(BaseModel):
-    id: uuid.UUID
+    id: UUID
     name: str
     path: str
     thumb: str | None
@@ -48,3 +48,11 @@ class DeleteResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     detail: str
+
+
+class UserResponse(BaseModel):
+    id: UUID
+    email: str | None
+    name: str | None
+    avatar_url: str | None
+    provider: str

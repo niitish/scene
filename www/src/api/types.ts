@@ -38,3 +38,11 @@ export interface DeleteResponse {
 export interface ErrorResponse {
   detail: string
 }
+
+export interface UserResponse {
+  id: string
+  email: string | null
+  name: string | null
+  avatar_url: string | null
+  provider: string
+}

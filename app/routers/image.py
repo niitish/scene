@@ -1,11 +1,12 @@
 import asyncio
 import os
-import uuid
 from datetime import datetime
 from http import HTTPStatus
+from uuid import UUID
 
 import aiofiles
 import aiofiles.os
+import uuid_utils
 from fastapi import APIRouter, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import func, select
@@ -20,6 +21,7 @@ from app.db import SessionDep
 from app.db.model import Image, ServiceQ
 from app.enums import ServiceType
 from app.logger import logger
+from app.routers.auth import CurrentUser
 from app.schemas import (
     DeleteResponse,
     ErrorResponse,
@@ -53,7 +55,9 @@ _IMAGE_COLS = (
 
 
 @router.post("/", responses={400: _ERRORS[400], 500: _ERRORS[500]})
-async def upload_file(file: UploadFile, session: SessionDep) -> UploadResponse:
+async def upload_file(
+    file: UploadFile, session: SessionDep, current_user: CurrentUser
+) -> UploadResponse:
     file_path = None
     try:
         if file.content_type not in ALLOWED_IMAGE_EXTENSIONS:
@@ -66,7 +70,7 @@ async def upload_file(file: UploadFile, session: SessionDep) -> UploadResponse:
 
         raw_ext = os.path.splitext(os.path.basename(file.filename or ""))[-1].lower()
         ext = raw_ext if raw_ext.lstrip(".").isalpha() else ""
-        unique_filename = f"{uuid.uuid7().hex}{ext}"
+        unique_filename = f"{uuid_utils.uuid7()}{ext}"
         file_path = os.path.join(UPLOAD_DIR, unique_filename)
 
         async with aiofiles.open(file_path, "wb") as buffer:
@@ -106,6 +110,7 @@ async def upload_file(file: UploadFile, session: SessionDep) -> UploadResponse:
 @router.get("/list", responses={400: _ERRORS[400], 500: _ERRORS[500]})
 async def list_files(
     session: SessionDep,
+    current_user: CurrentUser,
     page: int = 1,
     page_size: int = 20,
 ) -> ListResponse:
@@ -147,8 +152,9 @@ async def list_files(
 
 @router.patch("/{image_id}", responses={404: _ERRORS[404], 500: _ERRORS[500]})
 async def update_file(
-    image_id: uuid.UUID,
+    image_id: UUID,
     session: SessionDep,
+    current_user: CurrentUser,
     body: ImageUpdateRequest,
 ) -> ImageMeta:
     try:
@@ -182,7 +188,9 @@ async def update_file(
 
 
 @router.delete("/{image_id}", responses={404: _ERRORS[404], 500: _ERRORS[500]})
-async def delete_file(image_id: uuid.UUID, session: SessionDep) -> DeleteResponse:
+async def delete_file(
+    image_id: UUID, session: SessionDep, current_user: CurrentUser
+) -> DeleteResponse:
     try:
         image = await session.get(Image, image_id)
         if not image:
@@ -215,7 +223,11 @@ async def delete_file(image_id: uuid.UUID, session: SessionDep) -> DeleteRespons
 
 @router.get("/search", responses={500: _ERRORS[500]})
 async def search_images(
-    query: str, session: SessionDep, page: int = 1, page_size: int = 10
+    query: str,
+    session: SessionDep,
+    current_user: CurrentUser,
+    page: int = 1,
+    page_size: int = 10,
 ) -> SimilarityListResponse:
     try:
         text_embeddings = await asyncio.to_thread(generate_text_vector, query)
@@ -255,7 +267,9 @@ async def search_images(
 
 
 @router.get("/{image_id}/", responses={404: _ERRORS[404], 500: _ERRORS[500]})
-async def get_image(image_id: uuid.UUID, session: SessionDep) -> FileResponse:
+async def get_image(
+    image_id: UUID, session: SessionDep, current_user: CurrentUser
+) -> FileResponse:
     try:
         image = await session.get(Image, image_id)
         if not image:
@@ -277,7 +291,9 @@ async def get_image(image_id: uuid.UUID, session: SessionDep) -> FileResponse:
 
 
 @router.get("/{image_id}/thumb", responses={404: _ERRORS[404], 500: _ERRORS[500]})
-async def get_thumb(image_id: uuid.UUID, session: SessionDep) -> FileResponse:
+async def get_thumb(
+    image_id: UUID, session: SessionDep, current_user: CurrentUser
+) -> FileResponse:
     try:
         image = await session.get(Image, image_id)
         if not image:
@@ -307,7 +323,11 @@ async def get_thumb(image_id: uuid.UUID, session: SessionDep) -> FileResponse:
     responses={404: _ERRORS[404], 422: _ERRORS[422], 500: _ERRORS[500]},
 )
 async def get_similar(
-    image_id: uuid.UUID, session: SessionDep, page: int = 1, page_size: int = 10
+    image_id: UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+    page: int = 1,
+    page_size: int = 10,
 ) -> SimilarityListResponse:
     try:
         image = await session.get(Image, image_id)

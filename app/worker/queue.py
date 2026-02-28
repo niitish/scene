@@ -1,7 +1,7 @@
 import asyncio
 import logging
-import uuid
 from datetime import datetime
+from uuid import UUID
 
 from sqlalchemy import text
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -55,7 +55,7 @@ async def _dequeue(session: AsyncSession) -> dict | None:
     }
 
 
-async def _mark_done(session: AsyncSession, job_id: uuid.UUID, success: bool) -> None:
+async def _mark_done(session: AsyncSession, job_id: UUID, success: bool) -> None:
     await session.exec(
         text("""
             UPDATE serviceq

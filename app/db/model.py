@@ -1,14 +1,30 @@
-import uuid
 from datetime import datetime
+from uuid import UUID
 
+import uuid_utils
 from pgvector.sqlalchemy import VECTOR
 from sqlmodel import ARRAY, Field, SQLModel, String
 
 from app.enums import ServiceStatus, ServiceType
 
 
+def uuid7() -> UUID:
+    return UUID(str(uuid_utils.uuid7()))
+
+
+class User(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid7, primary_key=True)
+    provider: str
+    provider_id: str
+    email: str | None = Field(default=None)
+    name: str | None = Field(default=None)
+    avatar_url: str | None = Field(default=None)
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+
 class Image(SQLModel, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid7, primary_key=True)
+    id: UUID = Field(default_factory=uuid7, primary_key=True)
     name: str
     path: str
     thumb: str | None = Field(default=None)
@@ -19,8 +35,8 @@ class Image(SQLModel, table=True):
 
 
 class ServiceQ(SQLModel, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid7, primary_key=True)
-    image_id: uuid.UUID = Field(foreign_key="image.id", ondelete="CASCADE")
+    id: UUID = Field(default_factory=uuid7, primary_key=True)
+    image_id: UUID = Field(foreign_key="image.id", ondelete="CASCADE")
     service_type: ServiceType
     status: ServiceStatus = Field(default=ServiceStatus.PENDING)
     attempts: int = Field(default=0)

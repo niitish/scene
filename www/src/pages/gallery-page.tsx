@@ -104,14 +104,24 @@ export function GalleryPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
-        <h1 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight">Gallery</h1>
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
+        <div>
+          <div className="inline-block border-2 border-black bg-cyan font-extrabold text-xs uppercase tracking-widest px-3 py-1 mb-3 shadow-[2px_2px_0px_#1a1a1a] -rotate-1">
+            Your Collection
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter leading-none">
+            Gallery
+          </h1>
+        </div>
+        <div className="flex items-center gap-3 mt-1">
           <PageSizeSelect value={pageSize} options={PAGE_SIZE_OPTIONS} onChange={setPageSize} />
           {data && (
-            <span className="border border-black shadow-[2px_2px_0px_#1a1a1a] px-3 py-1 bg-cyan/80 font-medium text-sm">
-              {data.count} images
-            </span>
+            <div className="relative">
+              <div className="absolute inset-0 translate-x-1 translate-y-1 bg-black" />
+              <span className="relative border-2 border-black shadow-none px-3 py-1.5 bg-cyan font-extrabold text-sm block">
+                {data.count} image{data.count !== 1 ? 's' : ''}
+              </span>
+            </div>
           )}
         </div>
       </div>
@@ -121,7 +131,7 @@ export function GalleryPage() {
           {Array.from({ length: 10 }).map((_, i) => (
             <div
               key={i}
-              className="border border-black shadow-[4px_4px_0px_#1a1a1a] bg-gray-200 animate-pulse"
+              className="border-2 border-black shadow-[4px_4px_0px_#1a1a1a] bg-gray-200 animate-pulse"
               style={{ aspectRatio: '4/3' }}
             />
           ))}
@@ -129,15 +139,33 @@ export function GalleryPage() {
       )}
 
       {error && (
-        <div className="border border-black shadow-[4px_4px_0px_#1a1a1a] bg-pink/70 p-4 sm:p-6 font-bold text-sm">
-          Failed to load images: {error.message}
+        <div className="relative">
+          <div className="absolute inset-0 translate-x-2 translate-y-2 bg-black border-2 border-black" />
+          <div className="relative border-2 border-black bg-pink p-5 sm:p-6 font-bold text-sm">
+            <span className="font-extrabold uppercase tracking-wide text-base block mb-1">
+              Failed to load
+            </span>
+            {error.message}
+          </div>
         </div>
       )}
 
       {data && data.items.length === 0 && (
-        <div className="border border-black shadow-[4px_4px_0px_#1a1a1a] bg-yellow/60 p-8 sm:p-10 text-center">
-          <p className="text-xl sm:text-2xl font-semibold">No images yet!</p>
-          <p className="font-bold mt-2 text-sm">Upload some images to get started.</p>
+        <div className="relative max-w-md mx-auto mt-12">
+          <div className="absolute inset-0 translate-x-3 translate-y-3 bg-cyan border-2 border-black" />
+          <div className="relative border-2 border-black bg-yellow p-10 text-center">
+            <p className="text-5xl mb-4">🖼️</p>
+            <p className="text-xl sm:text-2xl font-extrabold uppercase tracking-tight mb-2">
+              No images yet!
+            </p>
+            <div className="border-t-2 border-black my-4" />
+            <p className="font-bold text-sm text-black/60 mb-6">
+              Upload some images to get started.
+            </p>
+            <NeoButton variant="black" onClick={() => navigate('/upload')}>
+              Upload Images →
+            </NeoButton>
+          </div>
         </div>
       )}
 
@@ -172,7 +200,7 @@ export function GalleryPage() {
           <div className="flex flex-col gap-4">
             <NeoInput label="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-bold uppercase tracking-wide">Tags</label>
+              <label className="text-sm font-extrabold uppercase tracking-widest">Tags</label>
               <div className="flex gap-2">
                 <NeoInput
                   placeholder="Add tag..."

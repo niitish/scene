@@ -77,44 +77,70 @@ export function UploadPage() {
   }
 
   const pendingCount = items.filter((i) => i.status === 'pending' || i.status === 'error').length
+  const doneCount = items.filter((i) => i.status === 'done').length
 
   return (
     <div>
-      <h1 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight mb-6">
-        Upload Images
-      </h1>
+      <div className="mb-8">
+        <div className="inline-block border-2 border-black bg-lime font-extrabold text-xs uppercase tracking-widest px-3 py-1 mb-3 shadow-[2px_2px_0px_#1a1a1a] rotate-1">
+          Add to Collection
+        </div>
+        <h1 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter leading-none">
+          Upload Images
+        </h1>
+      </div>
 
-      <div
-        onDragOver={(e) => {
-          e.preventDefault()
-          setDragging(true)
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        onClick={() => inputRef.current?.click()}
-        className={`border-2 border-dashed border-black/60 p-8 sm:p-12 text-center cursor-pointer transition-colors duration-100 ${
-          dragging ? 'bg-yellow' : 'bg-white hover:bg-yellow/30'
-        }`}
-      >
-        <p className="text-4xl mb-3">📁</p>
-        <p className="font-semibold text-lg sm:text-xl uppercase">Drop images here</p>
-        <p className="font-bold text-gray-500 mt-1 text-sm">or tap to browse</p>
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => e.target.files && addFiles(e.target.files)}
+      <div className="relative mb-8">
+        <div
+          className={`absolute inset-0 translate-x-2.5 translate-y-2.5 border-2 border-black transition-colors duration-100 ${dragging ? 'bg-yellow' : 'bg-black'}`}
         />
+        <div
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragging(true)
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+          onClick={() => inputRef.current?.click()}
+          className={`relative border-2 border-black p-10 sm:p-16 text-center cursor-pointer transition-all duration-75 ${
+            dragging ? 'bg-yellow' : 'bg-white'
+          } ${!dragging ? 'hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[3px] active:translate-y-[3px]' : ''}`}
+        >
+          <div
+            className={`text-5xl mb-4 transition-transform duration-100 ${dragging ? 'scale-125' : ''}`}
+          >
+            📁
+          </div>
+          <p className="font-extrabold text-xl sm:text-2xl uppercase tracking-tight mb-1">
+            {dragging ? 'Drop to add!' : 'Drop images here'}
+          </p>
+          <p className="font-bold text-black/50 text-sm uppercase tracking-widest">
+            or click to browse
+          </p>
+          <input
+            ref={inputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => e.target.files && addFiles(e.target.files)}
+          />
+        </div>
       </div>
 
       {items.length > 0 && (
-        <div className="mt-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <h2 className="font-semibold text-lg sm:text-xl uppercase">
-              {items.length} file{items.length !== 1 ? 's' : ''} queued
-            </h2>
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+            <div>
+              <h2 className="font-extrabold text-xl sm:text-2xl uppercase tracking-tight">
+                {items.length} file{items.length !== 1 ? 's' : ''} queued
+              </h2>
+              {doneCount > 0 && (
+                <p className="text-sm font-bold text-black/50 mt-0.5">
+                  {doneCount} of {items.length} uploaded
+                </p>
+              )}
+            </div>
             <div className="flex gap-2 sm:gap-3">
               <NeoButton
                 variant="lime"
@@ -148,34 +174,43 @@ export function UploadPage() {
                   />
                   <div
                     className={`absolute inset-0 flex items-center justify-center ${
-                      item.status === 'uploading' ? 'bg-black/40' : ''
-                    } ${item.status === 'done' ? 'bg-lime/60' : ''} ${
-                      item.status === 'error' ? 'bg-pink/60' : ''
+                      item.status === 'uploading' ? 'bg-black/50' : ''
+                    } ${item.status === 'done' ? 'bg-lime/70' : ''} ${
+                      item.status === 'error' ? 'bg-pink/70' : ''
                     }`}
                   >
                     {item.status === 'uploading' && (
-                      <span className="text-white font-semibold text-lg">⏳</span>
+                      <span className="text-white font-extrabold text-2xl animate-pulse">⏳</span>
                     )}
-                    {item.status === 'done' && <span className="font-semibold text-2xl">✓</span>}
-                    {item.status === 'error' && <span className="font-semibold text-2xl">✗</span>}
+                    {item.status === 'done' && (
+                      <span className="font-extrabold text-3xl text-black">✓</span>
+                    )}
+                    {item.status === 'error' && (
+                      <span className="font-extrabold text-3xl text-black">✗</span>
+                    )}
                   </div>
                   {item.status !== 'uploading' && item.status !== 'done' && (
                     <button
-                      onClick={() => removeItem(idx)}
-                      className="absolute top-1 right-1 bg-black text-white border border-white w-6 h-6 flex items-center justify-center font-semibold text-xs cursor-pointer hover:bg-gray-800"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        removeItem(idx)
+                      }}
+                      className="absolute top-1.5 right-1.5 bg-black text-white border-2 border-white w-6 h-6 flex items-center justify-center font-extrabold text-xs cursor-pointer hover:bg-gray-800 transition-colors"
                     >
                       ✕
                     </button>
                   )}
                 </div>
-                <div className="p-2">
-                  <p className="text-xs font-bold truncate" title={item.file.name}>
+                <div className="p-2.5">
+                  <p className="text-xs font-extrabold truncate" title={item.file.name}>
                     {item.file.name}
                   </p>
                   {item.status === 'error' && (
-                    <p className="text-xs text-red-700 font-bold mt-1">{item.error}</p>
+                    <p className="text-xs text-red-700 font-bold mt-1 leading-tight">
+                      {item.error}
+                    </p>
                   )}
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-black/40 font-bold mt-0.5">
                     {(item.file.size / 1024).toFixed(0)} KB
                   </p>
                 </div>
@@ -184,11 +219,21 @@ export function UploadPage() {
           </div>
 
           {items.every((i) => i.status === 'done') && (
-            <div className="mt-6 border border-black shadow-[4px_4px_0px_#1a1a1a] bg-lime/80 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-              <p className="font-bold text-base sm:text-lg uppercase">All uploads complete!</p>
-              <NeoButton variant="black" onClick={() => navigate('/gallery')}>
-                View Gallery →
-              </NeoButton>
+            <div className="mt-8 relative">
+              <div className="absolute inset-0 translate-x-2.5 translate-y-2.5 bg-black border-2 border-black" />
+              <div className="relative border-2 border-black bg-lime p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+                <div>
+                  <p className="font-extrabold text-lg sm:text-xl uppercase tracking-tight">
+                    All uploads complete!
+                  </p>
+                  <p className="text-sm font-bold text-black/60 mt-0.5">
+                    {items.length} image{items.length !== 1 ? 's' : ''} added to your gallery.
+                  </p>
+                </div>
+                <NeoButton variant="black" onClick={() => navigate('/gallery')}>
+                  View Gallery →
+                </NeoButton>
+              </div>
             </div>
           )}
         </div>

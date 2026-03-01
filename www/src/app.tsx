@@ -34,7 +34,15 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-bg relative">
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+        }}
+      />
       <header className="border-b border-black/80 bg-gray-900 text-white sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 flex items-center h-14 gap-2">
           <button

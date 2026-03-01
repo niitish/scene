@@ -7,6 +7,7 @@ import { LoginPage } from '@/pages/login-page'
 import { SearchPage } from '@/pages/search-page'
 import { SimilarPage } from '@/pages/similar-page'
 import { UploadPage } from '@/pages/upload-page'
+import { NotFoundPage } from '@/pages/not-found-page'
 import { AuthProvider } from '@/auth-context'
 import { RequireAuth } from '@/components/require-auth'
 import { SWRConfig } from 'swr'
@@ -43,6 +44,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path=":imageId" element={<SimilarPage />} />
               </Route>
             </Route>
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>

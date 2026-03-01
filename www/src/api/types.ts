@@ -6,6 +6,7 @@ export interface ImageMeta {
   created_at: string
   updated_at: string
   tags: string[]
+  uploaded_by: string | null
 }
 
 export interface ImageWithSimilarity extends ImageMeta {
@@ -39,10 +40,13 @@ export interface ErrorResponse {
   detail: string
 }
 
+export type UserRole = 'READ' | 'WRITE' | 'ADMIN'
+
 export interface UserResponse {
   id: string
   email: string | null
   name: string | null
   avatar_url: string | null
   provider: string
+  role: UserRole
 }

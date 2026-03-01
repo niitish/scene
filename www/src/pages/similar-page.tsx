@@ -61,7 +61,7 @@ export function SimilarPage() {
         <NeoButton variant="white" size="sm" onClick={() => navigate(-1)}>
           ← Back
         </NeoButton>
-        <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight">Similar</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight">Similar</h1>
       </div>
 
       <div className="border border-black shadow-[3px_3px_0px_#1a1a1a] bg-white p-3 sm:p-4 mb-6 flex items-center gap-3 sm:gap-4">
@@ -71,7 +71,7 @@ export function SimilarPage() {
           className="w-14 h-14 sm:w-20 sm:h-20 object-cover border border-black shrink-0"
         />
         <div className="min-w-0">
-          <p className="font-black text-sm uppercase">Source Image</p>
+          <p className="font-bold text-sm uppercase">Source Image</p>
           <p className="font-mono text-xs text-gray-500 break-all">{imageId}</p>
         </div>
       </div>

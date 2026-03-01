@@ -37,7 +37,7 @@ export function UserAvatar({ name, email, avatarUrl, size = 'md' }: Props) {
   }
 
   return (
-    <div className={`${cls} bg-yellow flex items-center justify-center text-black font-black`}>
+    <div className={`${cls} bg-yellow flex items-center justify-center text-black font-bold`}>
       {initials}
     </div>
   )

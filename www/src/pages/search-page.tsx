@@ -71,7 +71,7 @@ export function SearchPage() {
 
   return (
     <div>
-      <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight mb-6">
+      <h1 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight mb-6">
         Search by Text
       </h1>
 
@@ -104,7 +104,7 @@ export function SearchPage() {
       {urlQuery && (
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-black text-base sm:text-lg uppercase">Results for:</span>
+            <span className="font-bold text-base sm:text-lg uppercase">Results for:</span>
             <span className="border border-black shadow-[2px_2px_0px_#1a1a1a] bg-yellow px-3 py-1 font-bold text-sm break-all">
               "{urlQuery}"
             </span>

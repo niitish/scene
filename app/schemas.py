@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from app.enums import UserRole
+
 
 class UploadResponse(BaseModel):
     image_id: UUID
@@ -17,6 +19,7 @@ class ImageMeta(BaseModel):
     created_at: datetime
     updated_at: datetime
     tags: list[str]
+    uploaded_by: UUID | None
 
 
 class ImageWithSimilarity(ImageMeta):
@@ -56,3 +59,4 @@ class UserResponse(BaseModel):
     name: str | None
     avatar_url: str | None
     provider: str
+    role: UserRole

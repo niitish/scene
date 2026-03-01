@@ -3,6 +3,7 @@ import useSWR, { useSWRConfig } from 'swr'
 import { useState } from 'react'
 import { deleteImage, fetcher, listKey, updateImage } from '@/api/client'
 import type { ImageMeta, ListResponse } from '@/api/types'
+import { useAuth } from '@/auth-context'
 import { ImageCard } from '@/components/image-card'
 import { Modal } from '@/components/modal'
 import { NeoButton } from '@/components/neo-button'
@@ -16,6 +17,7 @@ const PAGE_SIZE_OPTIONS = [10, 20, 50, 100]
 
 export function GalleryPage() {
   const { addToast, setPreview } = useOutletContext<OutletContext>()
+  const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { mutate } = useSWRConfig()
@@ -103,7 +105,7 @@ export function GalleryPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6 gap-3 flex-wrap">
-        <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight">Gallery</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight">Gallery</h1>
         <div className="flex items-center gap-3">
           <PageSizeSelect value={pageSize} options={PAGE_SIZE_OPTIONS} onChange={setPageSize} />
           {data && (
@@ -145,6 +147,8 @@ export function GalleryPage() {
             <ImageCard
               key={img.id}
               image={img}
+              currentUserId={user?.id}
+              isAdmin={user?.role === 'ADMIN'}
               onEdit={openEdit}
               onDelete={setDeleteTarget}
               onViewSimilar={(id) => navigate(`/similar/${id}`)}
@@ -168,7 +172,7 @@ export function GalleryPage() {
           <div className="flex flex-col gap-4">
             <NeoInput label="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-black uppercase tracking-wide">Tags</label>
+              <label className="text-sm font-bold uppercase tracking-wide">Tags</label>
               <div className="flex gap-2">
                 <NeoInput
                   placeholder="Add tag..."

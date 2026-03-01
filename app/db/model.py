@@ -5,7 +5,7 @@ import uuid_utils
 from pgvector.sqlalchemy import VECTOR
 from sqlmodel import ARRAY, Field, SQLModel, String
 
-from app.enums import ServiceStatus, ServiceType
+from app.enums import ServiceStatus, ServiceType, UserRole
 
 
 def uuid7() -> UUID:
@@ -19,6 +19,7 @@ class User(SQLModel, table=True):
     email: str | None = Field(default=None)
     name: str | None = Field(default=None)
     avatar_url: str | None = Field(default=None)
+    role: UserRole = Field(default=UserRole.READ)
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
 
@@ -32,6 +33,9 @@ class Image(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.now)
     tags: list[str] = Field(default=[], sa_type=ARRAY[str](String))
     embeddings: list[float] | None = Field(sa_type=VECTOR(512), default=None)
+    uploaded_by: UUID | None = Field(
+        default=None, foreign_key="user.id", ondelete="SET NULL"
+    )
 
 
 class ServiceQ(SQLModel, table=True):

@@ -5,6 +5,8 @@ import { NeoTag } from '@/components/neo-tag'
 
 interface Props {
   image: ImageMeta | ImageWithSimilarity
+  currentUserId?: string | null
+  isAdmin?: boolean
   onEdit?: (image: ImageMeta) => void
   onDelete?: (id: string) => void
   onViewSimilar?: (id: string) => void
@@ -94,8 +96,17 @@ function TagRow({ tags }: { tags: string[] }) {
   )
 }
 
-export function ImageCard({ image, onEdit, onDelete, onViewSimilar, onPreview }: Props) {
+export function ImageCard({
+  image,
+  currentUserId,
+  isAdmin,
+  onEdit,
+  onDelete,
+  onViewSimilar,
+  onPreview,
+}: Props) {
   const [imgError, setImgError] = useState(false)
+  const isOwner = isAdmin || (currentUserId != null && image.uploaded_by === currentUserId)
 
   return (
     <div className="border border-black shadow-[4px_4px_0px_#1a1a1a] bg-white flex flex-col group">
@@ -145,7 +156,7 @@ export function ImageCard({ image, onEdit, onDelete, onViewSimilar, onPreview }:
               Similar
             </button>
           )}
-          {onEdit && (
+          {onEdit && isOwner && (
             <button
               onClick={() => onEdit(image)}
               className="flex-1 border border-black shadow-[2px_2px_0px_#1a1a1a] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] bg-yellow/80 py-1 text-[11px] font-semibold cursor-pointer hover:brightness-95 transition-all duration-75"
@@ -153,7 +164,7 @@ export function ImageCard({ image, onEdit, onDelete, onViewSimilar, onPreview }:
               Edit
             </button>
           )}
-          {onDelete && (
+          {onDelete && isOwner && (
             <button
               onClick={() => onDelete(image.id)}
               className="flex-1 border border-black shadow-[2px_2px_0px_#1a1a1a] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] bg-pink/70 py-1 text-[11px] font-semibold cursor-pointer hover:brightness-95 transition-all duration-75"

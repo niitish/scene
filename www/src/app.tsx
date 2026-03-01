@@ -15,7 +15,7 @@ const NAV_ITEMS = [
 ]
 
 const navLinkClass = (isActive: boolean, activeAccent: string) =>
-  `px-3 py-2 font-black text-xs sm:text-sm uppercase tracking-wide border transition-all duration-75 cursor-pointer ${
+  `px-3 py-2 font-bold text-xs sm:text-sm uppercase tracking-wide border transition-all duration-75 cursor-pointer ${
     isActive
       ? `${activeAccent} text-black border-black shadow-[2px_2px_0px_rgba(255,255,255,0.3)]`
       : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500'
@@ -41,7 +41,7 @@ export function App() {
             onClick={() => navigate('/gallery')}
             className="flex items-center gap-2 cursor-pointer shrink-0"
           >
-            <span className="text-xl font-black uppercase tracking-tighter text-yellow">SCENE</span>
+            <span className="text-xl font-bold uppercase tracking-tighter text-yellow">SCENE</span>
             <span className="text-xl">🖼️</span>
           </button>
 
@@ -59,7 +59,7 @@ export function App() {
               to="/similar"
               className={({ isActive }) =>
                 isActive
-                  ? 'px-3 py-2 font-black text-xs sm:text-sm uppercase tracking-wide border bg-pink/80 text-black border-black shadow-[2px_2px_0px_rgba(255,255,255,0.3)] cursor-pointer'
+                  ? 'px-3 py-2 font-bold text-xs sm:text-sm uppercase tracking-wide border bg-pink/80 text-black border-black shadow-[2px_2px_0px_rgba(255,255,255,0.3)] cursor-pointer'
                   : 'hidden'
               }
             >
@@ -114,7 +114,7 @@ export function App() {
                 to={to}
                 onClick={() => setMenuOpen(false)}
                 className={({ isActive }) =>
-                  `px-5 py-3 font-black text-sm uppercase tracking-wide border-b border-gray-800 transition-colors ${
+                  `px-5 py-3 font-bold text-sm uppercase tracking-wide border-b border-gray-800 transition-colors ${
                     isActive
                       ? `${activeAccent} text-black`
                       : 'text-gray-400 hover:text-white hover:bg-gray-800'
@@ -129,7 +129,7 @@ export function App() {
               onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
                 isActive
-                  ? 'px-5 py-3 font-black text-sm uppercase tracking-wide bg-pink/80 text-black border-b border-gray-800'
+                  ? 'px-5 py-3 font-bold text-sm uppercase tracking-wide bg-pink/80 text-black border-b border-gray-800'
                   : 'hidden'
               }
             >

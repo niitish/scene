@@ -80,7 +80,7 @@ export function UploadPage() {
 
   return (
     <div>
-      <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight mb-6">
+      <h1 className="text-2xl sm:text-3xl font-bold uppercase tracking-tight mb-6">
         Upload Images
       </h1>
 
@@ -185,7 +185,7 @@ export function UploadPage() {
 
           {items.every((i) => i.status === 'done') && (
             <div className="mt-6 border border-black shadow-[4px_4px_0px_#1a1a1a] bg-lime/80 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-              <p className="font-black text-base sm:text-lg uppercase">All uploads complete!</p>
+              <p className="font-bold text-base sm:text-lg uppercase">All uploads complete!</p>
               <NeoButton variant="black" onClick={() => navigate('/gallery')}>
                 View Gallery →
               </NeoButton>

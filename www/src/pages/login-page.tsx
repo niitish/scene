@@ -10,6 +10,15 @@ const errorMessages: Record<string, string> = {
   access_denied: 'Access was denied.',
 }
 
+const ACCENT_BLOCKS = [
+  { color: 'bg-yellow', rotate: '-rotate-2', top: '8%', left: '5%', w: 'w-24', h: 'h-10' },
+  { color: 'bg-pink', rotate: 'rotate-3', top: '15%', right: '8%', w: 'w-16', h: 'h-16' },
+  { color: 'bg-cyan', rotate: '-rotate-1', bottom: '20%', left: '10%', w: 'w-20', h: 'h-8' },
+  { color: 'bg-lime', rotate: 'rotate-2', bottom: '10%', right: '6%', w: 'w-14', h: 'h-14' },
+  { color: 'bg-orange', rotate: '-rotate-3', top: '45%', left: '3%', w: 'w-10', h: 'h-10' },
+  { color: 'bg-purple', rotate: 'rotate-1', top: '60%', right: '4%', w: 'w-12', h: 'h-6' },
+]
+
 export function LoginPage() {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
@@ -23,23 +32,41 @@ export function LoginPage() {
   }, [user, loading, navigate])
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-black uppercase tracking-tighter text-yellow">SCENE</h1>
-          <p className="text-gray-400 mt-2 font-medium text-sm">Sign in to manage your images</p>
+    <div className="min-h-screen bg-bg flex items-center justify-center px-4 overflow-hidden relative">
+      {ACCENT_BLOCKS.map((b, i) => (
+        <div
+          key={i}
+          className={`absolute border-2 border-black ${b.color} ${b.rotate} ${b.w} ${b.h} opacity-70`}
+          style={{ top: b.top, bottom: b.bottom, left: b.left, right: b.right }}
+        />
+      ))}
+
+      <div className="w-full max-w-sm relative z-10">
+        <div className="mb-8">
+          <div className="inline-block bg-yellow border-2 border-black shadow-[5px_5px_0px_#1a1a1a] px-4 py-1 mb-4 -rotate-1">
+            <span className="text-xs font-bold uppercase tracking-widest text-black">
+              Image Gallery
+            </span>
+          </div>
+          <h1 className="text-6xl font-bold uppercase tracking-tighter text-black leading-none">
+            SCENE
+          </h1>
+          <p className="text-black/60 mt-3 font-semibold text-sm uppercase tracking-wide">
+            Sign in to continue
+          </p>
         </div>
 
-        <div className="border border-black shadow-[6px_6px_0px_#1a1a1a] bg-gray-900 p-8 flex flex-col gap-4">
+        <div className="border-2 border-black shadow-[8px_8px_0px_#1a1a1a] bg-white p-8 flex flex-col gap-4">
           {error && (
-            <div className="border border-black bg-pink/70 px-4 py-3 text-sm font-bold">
+            <div className="border-2 border-black bg-pink px-4 py-3 text-sm font-bold flex items-center gap-2">
+              <span className="text-lg leading-none">!</span>
               {errorMessages[error] ?? 'Something went wrong. Please try again.'}
             </div>
           )}
 
           <a
             href={googleLoginUrl()}
-            className="flex items-center justify-center gap-3 border border-black shadow-[3px_3px_0px_#1a1a1a] bg-white text-black px-5 py-3 font-semibold text-sm hover:brightness-95 active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-75 cursor-pointer"
+            className="flex items-center justify-center gap-3 border-2 border-black shadow-[4px_4px_0px_#1a1a1a] bg-white text-black px-5 py-3.5 font-bold text-sm hover:bg-gray-50 active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all duration-75 cursor-pointer"
           >
             <GoogleIcon />
             Continue with Google
@@ -47,7 +74,7 @@ export function LoginPage() {
 
           <a
             href={githubLoginUrl()}
-            className="flex items-center justify-center gap-3 border border-black shadow-[3px_3px_0px_#1a1a1a] bg-black text-white px-5 py-3 font-semibold text-sm hover:bg-gray-800 active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-75 cursor-pointer"
+            className="flex items-center justify-center gap-3 border-2 border-black shadow-[4px_4px_0px_#1a1a1a] bg-black text-white px-5 py-3.5 font-bold text-sm hover:bg-gray-900 active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all duration-75 cursor-pointer"
           >
             <GitHubIcon />
             Continue with GitHub

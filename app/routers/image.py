@@ -19,9 +19,9 @@ from app.constants import (
 )
 from app.db import SessionDep
 from app.db.model import Image, ServiceQ
-from app.enums import ServiceType
+from app.deps import ReadUser, WriteUser
+from app.enums import ServiceType, UserRole
 from app.logger import logger
-from app.routers.auth import CurrentUser
 from app.schemas import (
     DeleteResponse,
     ErrorResponse,
@@ -37,6 +37,7 @@ router = APIRouter()
 
 _ERRORS = {
     400: {"model": ErrorResponse},
+    403: {"model": ErrorResponse},
     404: {"model": ErrorResponse},
     422: {"model": ErrorResponse},
     500: {"model": ErrorResponse},
@@ -51,12 +52,13 @@ _IMAGE_COLS = (
     Image.created_at,
     Image.updated_at,
     Image.tags,
+    Image.uploaded_by,
 )
 
 
-@router.post("/", responses={400: _ERRORS[400], 500: _ERRORS[500]})
+@router.post("/", responses={400: _ERRORS[400], 403: _ERRORS[403], 500: _ERRORS[500]})
 async def upload_file(
-    file: UploadFile, session: SessionDep, current_user: CurrentUser
+    file: UploadFile, session: SessionDep, current_user: WriteUser
 ) -> UploadResponse:
     file_path = None
     try:
@@ -80,6 +82,7 @@ async def upload_file(
         image = Image(
             name=file.filename or unique_filename,
             path=file_path,
+            uploaded_by=current_user.id,
         )
         session.add(image)
         await session.flush()
@@ -107,10 +110,12 @@ async def upload_file(
         )
 
 
-@router.get("/list", responses={400: _ERRORS[400], 500: _ERRORS[500]})
+@router.get(
+    "/list", responses={400: _ERRORS[400], 403: _ERRORS[403], 500: _ERRORS[500]}
+)
 async def list_files(
     session: SessionDep,
-    current_user: CurrentUser,
+    current_user: ReadUser,
     page: int = 1,
     page_size: int = 20,
 ) -> ListResponse:
@@ -150,11 +155,13 @@ async def list_files(
         )
 
 
-@router.patch("/{image_id}", responses={404: _ERRORS[404], 500: _ERRORS[500]})
+@router.patch(
+    "/{image_id}", responses={403: _ERRORS[403], 404: _ERRORS[404], 500: _ERRORS[500]}
+)
 async def update_file(
     image_id: UUID,
     session: SessionDep,
-    current_user: CurrentUser,
+    current_user: WriteUser,
     body: ImageUpdateRequest,
 ) -> ImageMeta:
     try:
@@ -162,6 +169,12 @@ async def update_file(
         if not image:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND, detail="Image not found"
+            )
+
+        if current_user.role != UserRole.ADMIN and image.uploaded_by != current_user.id:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN,
+                detail="Only the uploader can edit this image",
             )
 
         if body.name is not None:
@@ -187,15 +200,23 @@ async def update_file(
         )
 
 
-@router.delete("/{image_id}", responses={404: _ERRORS[404], 500: _ERRORS[500]})
+@router.delete(
+    "/{image_id}", responses={403: _ERRORS[403], 404: _ERRORS[404], 500: _ERRORS[500]}
+)
 async def delete_file(
-    image_id: UUID, session: SessionDep, current_user: CurrentUser
+    image_id: UUID, session: SessionDep, current_user: WriteUser
 ) -> DeleteResponse:
     try:
         image = await session.get(Image, image_id)
         if not image:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND, detail="Image not found"
+            )
+
+        if current_user.role != UserRole.ADMIN and image.uploaded_by != current_user.id:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN,
+                detail="Only the uploader can delete this image",
             )
 
         try:
@@ -221,11 +242,11 @@ async def delete_file(
         )
 
 
-@router.get("/search", responses={500: _ERRORS[500]})
+@router.get("/search", responses={403: _ERRORS[403], 500: _ERRORS[500]})
 async def search_images(
     query: str,
     session: SessionDep,
-    current_user: CurrentUser,
+    current_user: ReadUser,
     page: int = 1,
     page_size: int = 10,
 ) -> SimilarityListResponse:
@@ -266,9 +287,11 @@ async def search_images(
         )
 
 
-@router.get("/{image_id}/", responses={404: _ERRORS[404], 500: _ERRORS[500]})
+@router.get(
+    "/{image_id}/", responses={403: _ERRORS[403], 404: _ERRORS[404], 500: _ERRORS[500]}
+)
 async def get_image(
-    image_id: UUID, session: SessionDep, current_user: CurrentUser
+    image_id: UUID, session: SessionDep, current_user: ReadUser
 ) -> FileResponse:
     try:
         image = await session.get(Image, image_id)
@@ -290,9 +313,12 @@ async def get_image(
         )
 
 
-@router.get("/{image_id}/thumb", responses={404: _ERRORS[404], 500: _ERRORS[500]})
+@router.get(
+    "/{image_id}/thumb",
+    responses={403: _ERRORS[403], 404: _ERRORS[404], 500: _ERRORS[500]},
+)
 async def get_thumb(
-    image_id: UUID, session: SessionDep, current_user: CurrentUser
+    image_id: UUID, session: SessionDep, current_user: ReadUser
 ) -> FileResponse:
     try:
         image = await session.get(Image, image_id)
@@ -325,7 +351,7 @@ async def get_thumb(
 async def get_similar(
     image_id: UUID,
     session: SessionDep,
-    current_user: CurrentUser,
+    current_user: ReadUser,
     page: int = 1,
     page_size: int = 10,
 ) -> SimilarityListResponse:

@@ -19,7 +19,7 @@ export function Pagination({ page, hasMore, onPrev, onNext }: Props) {
       >
         ← Prev
       </NeoButton>
-      <span className="border-2 border-black shadow-[3px_3px_0px_#000] px-3 font-black bg-yellow flex items-center text-sm">
+      <span className="border-2 border-black shadow-[3px_3px_0px_#000] px-3 font-bold bg-yellow flex items-center text-sm">
         Page {page}
       </span>
       <NeoButton

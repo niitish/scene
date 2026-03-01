@@ -1,28 +1,21 @@
-import os
-from datetime import datetime, timedelta
-from http import HTTPStatus
-from typing import Annotated
-from uuid import UUID
+from datetime import datetime
 
 from authlib.integrations.starlette_client import OAuth
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Request, Response
 from fastapi.responses import RedirectResponse
-from jose import JWTError, jwt
 from sqlmodel import select
 from starlette.config import Config
 
 from app.constants import (
-    ACCESS_TOKEN_EXPIRE_MINUTES,
     FRONTEND_URL,
     GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET,
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
-    JWT_SECRET,
-    SECURE_COOKIES,
 )
 from app.db import SessionDep
 from app.db.model import User
+from app.deps import CurrentUser, create_access_token, set_auth_cookie
 from app.logger import logger
 from app.schemas import UserResponse
 
@@ -53,25 +46,6 @@ oauth.register(
     api_base_url="https://api.github.com/",
     client_kwargs={"scope": "read:user user:email"},
 )
-
-
-def _create_access_token(user_id: UUID) -> str:
-    expire = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    return jwt.encode(
-        {"sub": str(user_id), "exp": expire}, JWT_SECRET, algorithm="HS256"
-    )
-
-
-def _set_auth_cookie(response: Response, token: str) -> None:
-    response.set_cookie(
-        key="access_token",
-        value=token,
-        httponly=True,
-        samesite="lax",
-        secure=SECURE_COOKIES,
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-        path="/",
-    )
 
 
 async def _upsert_user(
@@ -105,31 +79,6 @@ async def _upsert_user(
     return user
 
 
-async def get_current_user(
-    session: SessionDep,
-    access_token: Annotated[str | None, Cookie()] = None,
-) -> User:
-    if not access_token:
-        raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail="Not authenticated"
-        )
-    try:
-        payload = jwt.decode(access_token, JWT_SECRET, algorithms=["HS256"])
-        user_id = UUID(payload["sub"])
-    except (JWTError, KeyError, ValueError):
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid token")
-
-    user = await session.get(User, user_id)
-    if not user:
-        raise HTTPException(
-            status_code=HTTPStatus.UNAUTHORIZED, detail="User not found"
-        )
-    return user
-
-
-CurrentUser = Annotated[User, Depends(get_current_user)]
-
-
 @router.get("/me")
 async def me(current_user: CurrentUser) -> UserResponse:
     return UserResponse(
@@ -138,6 +87,7 @@ async def me(current_user: CurrentUser) -> UserResponse:
         name=current_user.name,
         avatar_url=current_user.avatar_url,
         provider=current_user.provider,
+        role=current_user.role,
     )
 
 
@@ -171,9 +121,9 @@ async def google_callback(request: Request, session: SessionDep) -> RedirectResp
         avatar_url=userinfo.get("picture"),
     )
 
-    token = _create_access_token(user.id)
+    token = create_access_token(user.id)
     response = RedirectResponse(f"{FRONTEND_URL}/gallery")
-    _set_auth_cookie(response, token)
+    set_auth_cookie(response, token)
     return response
 
 
@@ -212,7 +162,7 @@ async def github_callback(request: Request, session: SessionDep) -> RedirectResp
         avatar_url=userinfo.get("avatar_url"),
     )
 
-    token = _create_access_token(user.id)
+    token = create_access_token(user.id)
     response = RedirectResponse(f"{FRONTEND_URL}/gallery")
-    _set_auth_cookie(response, token)
+    set_auth_cookie(response, token)
     return response

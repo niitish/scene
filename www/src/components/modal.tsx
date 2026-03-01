@@ -35,7 +35,7 @@ export function Modal({ open, onClose, title, children }: Props) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-black px-4 py-3 bg-yellow/60 sticky top-0">
-          <h2 className="font-black text-sm uppercase tracking-wide">{title}</h2>
+          <h2 className="font-bold text-sm uppercase tracking-wide">{title}</h2>
           <NeoButton variant="black" size="sm" onClick={onClose}>
             ✕
           </NeoButton>

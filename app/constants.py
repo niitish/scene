@@ -1,9 +1,5 @@
 import os
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/scene"
-)
-
 UPLOAD_DIR = "uploads"
 ALLOWED_IMAGE_EXTENSIONS = {
     "image/jpeg",

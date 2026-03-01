@@ -126,14 +126,11 @@ export function SearchPage() {
       )}
 
       {isLoading && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className="border-2 border-black shadow-[4px_4px_0px_#1a1a1a] bg-gray-200 animate-pulse"
-              style={{ aspectRatio: '4/3' }}
-            />
-          ))}
+        <div className="relative">
+          <div className="absolute inset-0 translate-x-2 translate-y-2 bg-black border-2 border-black" />
+          <div className="relative border-2 border-black bg-cyan p-5 sm:p-6 font-bold text-sm">
+            <span className="font-extrabold uppercase tracking-wide">Loading...</span>
+          </div>
         </div>
       )}
 

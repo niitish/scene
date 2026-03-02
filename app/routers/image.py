@@ -118,6 +118,7 @@ async def list_files(
     current_user: ReadUser,
     page: int = 1,
     page_size: int = 20,
+    tag: str | None = None,
 ) -> ListResponse:
     try:
         if page < 1:
@@ -131,24 +132,37 @@ async def list_files(
             )
 
         offset = (page - 1) * page_size
-        count_result = await session.exec(select(func.count()).select_from(Image))
+        tag_filter = Image.tags.contains([tag.strip()]) if tag and tag.strip() else None
+
+        count_stmt = select(func.count()).select_from(Image)
+        if tag_filter is not None:
+            count_stmt = count_stmt.where(tag_filter)
+        count_result = await session.exec(count_stmt)
         total = count_result.one()
 
-        result = await session.exec(
-            select(*_IMAGE_COLS).order_by(Image.id).offset(offset).limit(page_size)
+        list_stmt = (
+            select(*_IMAGE_COLS)
+            .order_by(Image.id.desc())
+            .offset(offset)
+            .limit(page_size)
         )
+        if tag_filter is not None:
+            list_stmt = list_stmt.where(tag_filter)
+        result = await session.exec(list_stmt)
         images = result.mappings().all()
 
         return {"page": page, "page_size": page_size, "count": total, "items": images}
 
     except HTTPException as e:
         logger.error(
-            f"Error listing images {page} with page_size {page_size}: {e.detail}"
+            f"Error listing images {page} with page_size {page_size}: {e.detail} tag: {tag}"
         )
         raise
 
     except Exception as e:
-        logger.error(f"Error listing images {page} with page_size {page_size}: {e}")
+        logger.error(
+            f"Error listing images {page} with page_size {page_size}: {e} tag: {tag}"
+        )
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail="Error listing images",
@@ -265,7 +279,7 @@ async def search_images(
         results = await session.exec(
             select(*_IMAGE_COLS, similarity)
             .where(distance < TEXT_SIMILARITY_THRESHOLD)
-            .order_by(distance, Image.id)
+            .order_by(distance, Image.id.desc())
             .offset((page - 1) * page_size)
             .limit(page_size)
         )
@@ -381,7 +395,7 @@ async def get_similar(
         results = await session.exec(
             select(*_IMAGE_COLS, similarity)
             .where(distance < SIMILARITY_THRESHOLD)
-            .order_by(distance, Image.id)
+            .order_by(distance, Image.id.desc())
             .offset((page - 1) * page_size)
             .limit(page_size)
         )

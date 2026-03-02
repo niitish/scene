@@ -16,8 +16,10 @@ export async function fetcher<T>(url: string): Promise<T> {
   return res.json() as Promise<T>
 }
 
-export function listKey(page: number, pageSize: number) {
-  return `${BASE}/list?page=${page}&page_size=${pageSize}`
+export function listKey(page: number, pageSize: number, tag?: string | null) {
+  const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) })
+  if (tag?.trim()) params.set('tag', tag.trim())
+  return `${BASE}/list?${params.toString()}`
 }
 
 export function searchKey(query: string, page: number, pageSize: number) {

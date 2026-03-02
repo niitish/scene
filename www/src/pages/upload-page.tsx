@@ -76,8 +76,15 @@ export function UploadPage() {
     addToast('Upload complete!', 'success')
   }
 
-  const pendingCount = items.filter((i) => i.status === 'pending' || i.status === 'error').length
-  const doneCount = items.filter((i) => i.status === 'done').length
+  const { pendingCount, doneCount, isUploading } = items.reduce(
+    (acc, i) => {
+      if (i.status === 'uploading') acc.isUploading = true
+      if (i.status === 'pending' || i.status === 'error') acc.pendingCount++
+      if (i.status === 'done') acc.doneCount++
+      return acc
+    },
+    { pendingCount: 0, doneCount: 0, isUploading: false }
+  )
 
   return (
     <div>
@@ -145,7 +152,7 @@ export function UploadPage() {
               <NeoButton
                 variant="lime"
                 onClick={uploadAll}
-                disabled={pendingCount === 0}
+                disabled={pendingCount === 0 || isUploading}
                 className="flex-1 sm:flex-none"
               >
                 Upload {pendingCount > 0 ? `(${pendingCount})` : 'All'}
@@ -153,6 +160,7 @@ export function UploadPage() {
               <NeoButton
                 variant="white"
                 className="flex-1 sm:flex-none"
+                disabled={isUploading}
                 onClick={() => {
                   items.forEach((i) => URL.revokeObjectURL(i.preview))
                   setItems([])

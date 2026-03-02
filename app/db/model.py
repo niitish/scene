@@ -3,7 +3,8 @@ from uuid import UUID
 
 import uuid_utils
 from pgvector.sqlalchemy import VECTOR
-from sqlmodel import ARRAY, Field, SQLModel, String
+from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
+from sqlmodel import Field, SQLModel, String
 
 from app.enums import ServiceStatus, ServiceType, UserRole
 
@@ -31,7 +32,7 @@ class Image(SQLModel, table=True):
     thumb: str | None = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
-    tags: list[str] = Field(default=[], sa_type=ARRAY[str](String))
+    tags: list[str] = Field(default=[], sa_type=PG_ARRAY(String))
     embeddings: list[float] | None = Field(sa_type=VECTOR(512), default=None)
     uploaded_by: UUID | None = Field(
         default=None, foreign_key="user.id", ondelete="SET NULL"

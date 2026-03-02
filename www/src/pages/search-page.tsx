@@ -167,6 +167,7 @@ export function SearchPage() {
                 image={img}
                 onViewSimilar={(id) => navigate(`/similar/${id}`)}
                 onPreview={(img: ImageMeta) => setPreview(img)}
+                onTagClick={(t) => navigate(`/gallery?tag=${encodeURIComponent(t)}`)}
               />
             ))}
           </div>

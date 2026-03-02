@@ -25,6 +25,7 @@ export function GalleryPage() {
   const page = Math.max(1, Number(searchParams.get('page') || 1))
   const rawSize = Number(searchParams.get('size') || 20)
   const pageSize = PAGE_SIZE_OPTIONS.includes(rawSize) ? rawSize : 20
+  const tag = searchParams.get('tag') || null
 
   function setPage(p: number) {
     setSearchParams(
@@ -45,8 +46,19 @@ export function GalleryPage() {
       { replace: true }
     )
   }
+  function setTag(t: string | null) {
+    setSearchParams(
+      (prev) => {
+        if (t) prev.set('tag', t)
+        else prev.delete('tag')
+        prev.set('page', '1')
+        return prev
+      },
+      { replace: true }
+    )
+  }
 
-  const { data, error, isLoading } = useSWR<ListResponse>(listKey(page, pageSize), fetcher)
+  const { data, error, isLoading } = useSWR<ListResponse>(listKey(page, pageSize, tag), fetcher)
 
   const [editTarget, setEditTarget] = useState<ImageMeta | null>(null)
   const [editName, setEditName] = useState('')
@@ -75,7 +87,7 @@ export function GalleryPage() {
     setSaving(true)
     try {
       await updateImage(editTarget.id, { name: editName, tags: editTags })
-      await mutate(listKey(page, pageSize))
+      await mutate(listKey(page, pageSize, tag))
       addToast('Image updated', 'success')
       setEditTarget(null)
     } catch (e: unknown) {
@@ -90,7 +102,7 @@ export function GalleryPage() {
     setDeleting(true)
     try {
       await deleteImage(deleteTarget)
-      await mutate(listKey(page, pageSize))
+      await mutate(listKey(page, pageSize, tag))
       addToast('Image deleted', 'success')
       setDeleteTarget(null)
     } catch (e: unknown) {
@@ -112,6 +124,21 @@ export function GalleryPage() {
           <h1 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter leading-none">
             Gallery
           </h1>
+          {tag && (
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-sm font-bold text-gray-600">Filtered by:</span>
+              <span className="inline-flex items-center gap-1 border border-black bg-yellow/70 px-2 py-0.5 text-sm font-semibold">
+                {tag}
+                <button
+                  onClick={() => setTag(null)}
+                  className="ml-0.5 font-bold hover:text-red-600 cursor-pointer leading-none"
+                  aria-label="Clear tag filter"
+                >
+                  ×
+                </button>
+              </span>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3 mt-1">
           <PageSizeSelect value={pageSize} options={PAGE_SIZE_OPTIONS} onChange={setPageSize} />
@@ -153,15 +180,23 @@ export function GalleryPage() {
           <div className="relative border-2 border-black bg-yellow p-10 text-center">
             <p className="text-5xl mb-4">🖼️</p>
             <p className="text-xl sm:text-2xl font-extrabold uppercase tracking-tight mb-2">
-              No images yet!
+              {tag ? `No images with tag "${tag}"` : 'No images yet!'}
             </p>
             <div className="border-t-2 border-black my-4" />
             <p className="font-bold text-sm text-black/60 mb-6">
-              Upload some images to get started.
+              {tag
+                ? 'Try a different tag or clear the filter.'
+                : 'Upload some images to get started.'}
             </p>
-            <NeoButton variant="black" onClick={() => navigate('/upload')}>
-              Upload Images →
-            </NeoButton>
+            {tag ? (
+              <NeoButton variant="black" onClick={() => setTag(null)}>
+                Clear filter
+              </NeoButton>
+            ) : (
+              <NeoButton variant="black" onClick={() => navigate('/upload')}>
+                Upload Images →
+              </NeoButton>
+            )}
           </div>
         </div>
       )}
@@ -178,6 +213,7 @@ export function GalleryPage() {
               onDelete={setDeleteTarget}
               onViewSimilar={(id) => navigate(`/similar/${id}`)}
               onPreview={setPreview}
+              onTagClick={(t) => setTag(t)}
             />
           ))}
         </div>

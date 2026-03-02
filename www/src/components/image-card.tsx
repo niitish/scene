@@ -11,13 +11,14 @@ interface Props {
   onDelete?: (id: string) => void
   onViewSimilar?: (id: string) => void
   onPreview?: (image: ImageMeta) => void
+  onTagClick?: (tag: string) => void
 }
 
 function isSimilar(img: ImageMeta | ImageWithSimilarity): img is ImageWithSimilarity {
   return 'similarity' in img
 }
 
-function TagRow({ tags }: { tags: string[] }) {
+function TagRow({ tags, onTagClick }: { tags: string[]; onTagClick?: (tag: string) => void }) {
   const measureRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [visibleCount, setVisibleCount] = useState(tags.length)
@@ -69,7 +70,7 @@ function TagRow({ tags }: { tags: string[] }) {
       >
         {tags.map((tag) => (
           <span key={tag} data-tag className="shrink-0">
-            <NeoTag label={tag} />
+            <NeoTag label={tag} onClick={onTagClick ? () => onTagClick(tag) : undefined} />
           </span>
         ))}
         <span
@@ -82,8 +83,8 @@ function TagRow({ tags }: { tags: string[] }) {
       {/* visible layer */}
       <div className="flex gap-1">
         {tags.slice(0, visibleCount).map((tag) => (
-          <span key={tag} className="shrink-0">
-            <NeoTag label={tag} />
+          <span key={tag} className="shrink-0" onClick={(e) => e.stopPropagation()}>
+            <NeoTag label={tag} onClick={onTagClick ? () => onTagClick(tag) : undefined} />
           </span>
         ))}
         {hidden > 0 && (
@@ -104,6 +105,7 @@ export function ImageCard({
   onDelete,
   onViewSimilar,
   onPreview,
+  onTagClick,
 }: Props) {
   const [imgError, setImgError] = useState(false)
   const isOwner = isAdmin || (currentUserId != null && image.uploaded_by === currentUserId)
@@ -141,7 +143,7 @@ export function ImageCard({
           {image.name}
         </p>
 
-        <TagRow tags={image.tags} />
+        <TagRow tags={image.tags} onTagClick={onTagClick} />
 
         <p className="text-xs text-gray-400 font-mono mt-auto">
           {new Date(image.created_at).toLocaleDateString()}

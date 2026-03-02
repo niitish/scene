@@ -1,6 +1,7 @@
 interface Props {
   label: string
   onRemove?: () => void
+  onClick?: () => void
 }
 
 const colors = [
@@ -18,21 +19,24 @@ function tagColor(label: string) {
   return colors[Math.abs(hash) % colors.length]
 }
 
-export function NeoTag({ label, onRemove }: Props) {
+export function NeoTag({ label, onRemove, onClick }: Props) {
+  const className = `
+    inline-flex items-center gap-1
+    border border-black/60
+    px-2 py-0.5
+    text-xs font-medium tracking-wide
+    ${tagColor(label)}
+    ${onClick ? 'cursor-pointer hover:brightness-95' : ''}
+  `
   return (
-    <span
-      className={`
-        inline-flex items-center gap-1
-        border border-black/60
-        px-2 py-0.5
-        text-xs font-medium tracking-wide
-        ${tagColor(label)}
-      `}
-    >
+    <span className={className} onClick={onClick} role={onClick ? 'button' : undefined}>
       {label}
       {onRemove && (
         <button
-          onClick={onRemove}
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove()
+          }}
           className="ml-0.5 font-semibold hover:text-red-600 cursor-pointer leading-none opacity-60 hover:opacity-100"
           aria-label={`Remove tag ${label}`}
         >

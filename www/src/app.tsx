@@ -180,6 +180,10 @@ export function App() {
           navigate(`/similar/${id}`)
           setPreview(null)
         }}
+        onTagClick={(tag) => {
+          navigate(`/gallery?tag=${encodeURIComponent(tag)}`)
+          setPreview(null)
+        }}
       />
 
       <ToastContainer toasts={toasts} onRemove={removeToast} />

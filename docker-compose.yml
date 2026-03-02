@@ -1,5 +1,10 @@
 services:
   db:
+    logging:
+      driver: json-file
+      options:
+        max-size: "32m"
+        max-file: "5"
     build:
       context: ./app/db
       dockerfile: Dockerfile
@@ -17,6 +22,11 @@ services:
       retries: 10
 
   app:
+    logging:
+      driver: json-file
+      options:
+        max-size: "32m"
+        max-file: "5"
     build: .
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/scene
@@ -46,6 +56,11 @@ services:
       start_period: 10s
 
   web:
+    logging:
+      driver: json-file
+      options:
+        max-size: "32m"
+        max-file: "5"
     build:
       context: ./www
       dockerfile: Dockerfile
@@ -56,6 +71,11 @@ services:
         condition: service_healthy
 
   pgadmin:
+    logging:
+      driver: json-file
+      options:
+        max-size: "32m"
+        max-file: "5"
     profiles: [pgadmin]
     image: dpage/pgadmin4
     environment:

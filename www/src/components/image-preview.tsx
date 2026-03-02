@@ -8,9 +8,10 @@ interface Props {
   image: ImageMeta | null
   onClose: () => void
   onViewSimilar?: (id: string) => void
+  onTagClick?: (tag: string) => void
 }
 
-export function ImagePreview({ image, onClose, onViewSimilar }: Props) {
+export function ImagePreview({ image, onClose, onViewSimilar, onTagClick }: Props) {
   useEffect(() => {
     if (!image) return
     document.body.style.overflow = 'hidden'
@@ -56,7 +57,11 @@ export function ImagePreview({ image, onClose, onViewSimilar }: Props) {
           {image.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 flex-1">
               {image.tags.map((tag) => (
-                <NeoTag key={tag} label={tag} />
+                <NeoTag
+                  key={tag}
+                  label={tag}
+                  onClick={onTagClick ? () => onTagClick(tag) : undefined}
+                />
               ))}
             </div>
           )}

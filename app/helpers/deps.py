@@ -6,10 +6,14 @@ from uuid import UUID
 from fastapi import Cookie, Depends, HTTPException, Response
 from jose import JWTError, jwt
 
-from app.constants import ACCESS_TOKEN_EXPIRE_MINUTES, JWT_SECRET, SECURE_COOKIES
 from app.db import SessionDep
 from app.db.model import User
-from app.enums import UserRole
+from app.helpers.constants import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    JWT_SECRET,
+    SECURE_COOKIES,
+)
+from app.helpers.enums import UserRole
 
 
 def create_access_token(user_id: UUID) -> str:

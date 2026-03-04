@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-from app.constants import WORKER_LOG_PATH
+from app.helpers.constants import WORKER_LOG_PATH
 
 logger = logging.getLogger("uvicorn.error")
 

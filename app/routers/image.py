@@ -11,18 +11,9 @@ from fastapi import APIRouter, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from sqlmodel import func, select
 
-from app.constants import (
-    ALLOWED_IMAGE_EXTENSIONS,
-    SIMILARITY_THRESHOLD,
-    TEXT_SIMILARITY_THRESHOLD,
-    UPLOAD_DIR,
-)
 from app.db import SessionDep
 from app.db.model import Image, ServiceQ
-from app.deps import ReadUser, WriteUser
-from app.enums import ServiceType, UserRole
-from app.logger import logger
-from app.schemas import (
+from app.db.types import (
     DeleteResponse,
     ErrorResponse,
     ImageMeta,
@@ -31,6 +22,16 @@ from app.schemas import (
     SimilarityListResponse,
     UploadResponse,
 )
+from app.helpers.constants import (
+    ALLOWED_IMAGE_EXTENSIONS,
+    SIMILARITY_THRESHOLD,
+    TEXT_SIMILARITY_THRESHOLD,
+    UPLOAD_DIR,
+)
+from app.helpers.deps import ReadUser, WriteUser
+from app.helpers.enums import ServiceType, UserRole
+from app.helpers.logger import logger
+from app.helpers.presence import image_exists
 from app.worker.vector import generate_text_vector
 
 router = APIRouter()
@@ -68,6 +69,17 @@ async def upload_file(
                 detail=f"Invalid file type '{file.content_type}'. Only image files are accepted.",
             )
 
+        content = await file.read()
+        result = await image_exists(content, file.filename, session)
+
+        if result["exists"]:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT,
+                detail="Image already exists",
+            )
+
+        file_hash = result["hash"]
+
         os.makedirs(UPLOAD_DIR, exist_ok=True)
 
         raw_ext = os.path.splitext(os.path.basename(file.filename or ""))[-1].lower()
@@ -76,13 +88,13 @@ async def upload_file(
         file_path = os.path.join(UPLOAD_DIR, unique_filename)
 
         async with aiofiles.open(file_path, "wb") as buffer:
-            content = await file.read()
             await buffer.write(content)
 
         image = Image(
             name=file.filename or unique_filename,
             path=file_path,
             uploaded_by=current_user.id,
+            hash=file_hash,
         )
         session.add(image)
         await session.flush()

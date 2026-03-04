@@ -3,7 +3,7 @@ import os
 
 from PIL import Image
 
-from app.constants import THUMB_SIZE, UPLOAD_DIR
+from app.helpers.constants import THUMB_SIZE, UPLOAD_DIR
 
 logger = logging.getLogger("worker.thumb")
 

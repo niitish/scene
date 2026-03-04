@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from app.enums import UserRole
+from app.helpers.enums import UserRole
 
 
 class UploadResponse(BaseModel):

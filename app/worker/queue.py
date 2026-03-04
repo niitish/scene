@@ -6,10 +6,10 @@ from uuid import UUID
 from sqlalchemy import text
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.constants import MAX_CONCURRENT_JOBS, POLL_INTERVAL
 from app.db import async_session
 from app.db.model import Image, ServiceQ
-from app.enums import ServiceStatus, ServiceType
+from app.helpers.constants import MAX_CONCURRENT_JOBS, POLL_INTERVAL
+from app.helpers.enums import ServiceStatus, ServiceType
 from app.worker.detect import detect_objects
 from app.worker.thumb import generate_thumb
 from app.worker.vector import generate_vector

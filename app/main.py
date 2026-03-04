@@ -6,8 +6,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from app import logger as _  # noqa: F401 — registers worker log handler
-from app.constants import FRONTEND_URL, SESSION_SECRET
+import app.helpers.logger as _  # noqa: F401 — registers worker log handler
+from app.helpers.constants import FRONTEND_URL, SESSION_SECRET
 from app.routers import auth, image
 from app.worker.queue import start_worker
 

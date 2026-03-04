@@ -5,7 +5,7 @@ import torch
 from PIL import Image
 from transformers import CLIPModel, CLIPProcessor
 
-from app.constants import CLIP_MODEL, CPU_ONLY
+from app.helpers.constants import CLIP_MODEL, CPU_ONLY
 
 logger = logging.getLogger("worker.vector")
 

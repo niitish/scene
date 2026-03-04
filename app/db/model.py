@@ -6,7 +6,7 @@ from pgvector.sqlalchemy import VECTOR
 from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
 from sqlmodel import Field, SQLModel, String
 
-from app.enums import ServiceStatus, ServiceType, UserRole
+from app.helpers.enums import ServiceStatus, ServiceType, UserRole
 
 
 def uuid7() -> UUID:
@@ -34,6 +34,7 @@ class Image(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.now)
     tags: list[str] = Field(default=[], sa_type=PG_ARRAY(String))
     embeddings: list[float] | None = Field(sa_type=VECTOR(512), default=None)
+    hash: str | None = Field(default=None)
     uploaded_by: UUID | None = Field(
         default=None, foreign_key="user.id", ondelete="SET NULL"
     )

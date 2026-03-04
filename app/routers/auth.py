@@ -6,18 +6,18 @@ from fastapi.responses import RedirectResponse
 from sqlmodel import select
 from starlette.config import Config
 
-from app.constants import (
+from app.db import SessionDep
+from app.db.model import User
+from app.db.types import UserResponse
+from app.helpers.constants import (
     FRONTEND_URL,
     GITHUB_CLIENT_ID,
     GITHUB_CLIENT_SECRET,
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
 )
-from app.db import SessionDep
-from app.db.model import User
-from app.deps import CurrentUser, create_access_token, set_auth_cookie
-from app.logger import logger
-from app.schemas import UserResponse
+from app.helpers.deps import CurrentUser, create_access_token, set_auth_cookie
+from app.helpers.logger import logger
 
 router = APIRouter()
 

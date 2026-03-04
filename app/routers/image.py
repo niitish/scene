@@ -325,7 +325,9 @@ async def get_image(
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND, detail="Image not found"
             )
-        return FileResponse(image.path)
+        return FileResponse(
+            image.path, headers={"Cache-Control": "public, max-age=31536000, immutable"}
+        )
 
     except HTTPException as e:
         logger.error(f"Error getting image {image_id}: {e.detail}")
@@ -354,9 +356,15 @@ async def get_thumb(
             )
 
         if not image.thumb:
-            return FileResponse(image.path)
+            return FileResponse(
+                image.path,
+                headers={"Cache-Control": "public, max-age=31536000, immutable"},
+            )
 
-        return FileResponse(image.thumb)
+        return FileResponse(
+            image.thumb,
+            headers={"Cache-Control": "public, max-age=31536000, immutable"},
+        )
 
     except HTTPException as e:
         logger.error(f"Error getting thumb {image_id}: {e.detail}")

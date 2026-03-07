@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { thumbUrl } from '@/api/client'
 import type { ImageMeta, ImageWithSimilarity } from '@/api/types'
+import { NeoButton } from '@/components/neo-button'
+import { NeoCard } from '@/components/neo-card'
 import { NeoTag } from '@/components/neo-tag'
 
 interface Props {
@@ -73,10 +75,7 @@ function TagRow({ tags, onTagClick }: { tags: string[]; onTagClick?: (tag: strin
             <NeoTag label={tag} onClick={onTagClick ? () => onTagClick(tag) : undefined} />
           </span>
         ))}
-        <span
-          data-overflow
-          className="shrink-0 text-xs text-gray-400 self-center whitespace-nowrap"
-        >
+        <span data-overflow className="shrink-0 text-xs text-muted self-center whitespace-nowrap">
           +00
         </span>
       </div>
@@ -88,7 +87,7 @@ function TagRow({ tags, onTagClick }: { tags: string[]; onTagClick?: (tag: strin
           </span>
         ))}
         {hidden > 0 && (
-          <span className="shrink-0 text-xs text-gray-400 self-center whitespace-nowrap">
+          <span className="shrink-0 text-xs text-muted self-center whitespace-nowrap">
             +{hidden}
           </span>
         )}
@@ -111,9 +110,9 @@ export function ImageCard({
   const isOwner = isAdmin || (currentUserId != null && image.uploaded_by === currentUserId)
 
   return (
-    <div className="border border-black shadow-[4px_4px_0px_#1a1a1a] bg-white flex flex-col group">
+    <NeoCard accent="bg-white" className="flex flex-col group">
       <div
-        className="relative overflow-hidden border-b border-black bg-gray-100 cursor-pointer"
+        className="relative overflow-hidden border-b border-gray-800 bg-gray-100 cursor-pointer"
         style={{ aspectRatio: '4/3' }}
         onClick={() => onPreview?.(image)}
       >
@@ -132,7 +131,7 @@ export function ImageCard({
           </div>
         )}
         {isSimilar(image) && (
-          <div className="absolute top-2 right-2 bg-lime/90 border border-black px-2 py-0.5 text-xs font-semibold">
+          <div className="absolute top-2 right-2 bg-lime/90 border border-gray-800 px-2 py-0.5 text-xs font-semibold">
             {(image.similarity * 100).toFixed(1)}%
           </div>
         )}
@@ -145,37 +144,38 @@ export function ImageCard({
 
         <TagRow tags={image.tags} onTagClick={onTagClick} />
 
-        <p className="text-xs text-gray-400 font-mono mt-auto">
+        <p className="text-xs text-muted font-mono mt-auto">
           {new Date(image.created_at).toLocaleDateString()}
         </p>
 
         <div className="flex gap-1.5 mt-auto">
           {onViewSimilar && (
-            <button
+            <NeoButton
+              variant="cyan"
+              size="xs"
+              className="flex-1"
               onClick={() => onViewSimilar(image.id)}
-              className="flex-1 border border-black shadow-[2px_2px_0px_#1a1a1a] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] bg-cyan/80 py-1 text-[11px] font-semibold cursor-pointer hover:brightness-95 transition-all duration-75"
             >
               Similar
-            </button>
+            </NeoButton>
           )}
           {onEdit && isOwner && (
-            <button
-              onClick={() => onEdit(image)}
-              className="flex-1 border border-black shadow-[2px_2px_0px_#1a1a1a] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] bg-yellow/80 py-1 text-[11px] font-semibold cursor-pointer hover:brightness-95 transition-all duration-75"
-            >
+            <NeoButton variant="yellow" size="xs" className="flex-1" onClick={() => onEdit(image)}>
               Edit
-            </button>
+            </NeoButton>
           )}
           {onDelete && isOwner && (
-            <button
+            <NeoButton
+              variant="pink"
+              size="xs"
+              className="flex-1"
               onClick={() => onDelete(image.id)}
-              className="flex-1 border border-black shadow-[2px_2px_0px_#1a1a1a] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] bg-pink/70 py-1 text-[11px] font-semibold cursor-pointer hover:brightness-95 transition-all duration-75"
             >
               Delete
-            </button>
+            </NeoButton>
           )}
         </div>
       </div>
-    </div>
+    </NeoCard>
   )
 }

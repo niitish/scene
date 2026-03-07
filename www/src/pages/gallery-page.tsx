@@ -3,10 +3,12 @@ import useSWR, { useSWRConfig } from 'swr'
 import { useState } from 'react'
 import { deleteImage, fetcher, listKey, updateImage } from '@/api/client'
 import type { ImageMeta, ListResponse } from '@/api/types'
-import { useAuth } from '@/auth-context'
+import { useAuth } from '@/use-auth'
 import { ImageCard } from '@/components/image-card'
 import { Modal } from '@/components/modal'
+import { NeoBadge } from '@/components/neo-badge'
 import { NeoButton } from '@/components/neo-button'
+import { NeoCard } from '@/components/neo-card'
 import { NeoInput } from '@/components/neo-input'
 import { NeoTag } from '@/components/neo-tag'
 import { PageSizeSelect } from '@/components/page-size-select'
@@ -118,16 +120,16 @@ export function GalleryPage() {
     <div>
       <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
         <div>
-          <div className="inline-block border-2 border-black bg-cyan font-extrabold text-xs uppercase tracking-widest px-3 py-1 mb-3 shadow-[2px_2px_0px_#1a1a1a] -rotate-1">
+          <NeoBadge accent="bg-cyan" rotate={-1} className="mb-3">
             Your Collection
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter leading-none">
+          </NeoBadge>
+          <h1 className="text-gray-800 text-4xl sm:text-5xl font-extrabold uppercase tracking-tighter leading-none">
             Gallery
           </h1>
           {tag && (
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-sm font-bold text-gray-600">Filtered by:</span>
-              <span className="inline-flex items-center gap-1 border border-black bg-yellow/70 px-2 py-0.5 text-sm font-semibold">
+              <span className="text-sm font-bold text-gray-500">Filtered by:</span>
+              <NeoBadge accent="bg-yellow" variant="flat" className="border!">
                 {tag}
                 <button
                   onClick={() => setTag(null)}
@@ -136,69 +138,62 @@ export function GalleryPage() {
                 >
                   ×
                 </button>
-              </span>
+              </NeoBadge>
             </div>
           )}
         </div>
         <div className="flex items-center gap-3 mt-1">
           <PageSizeSelect value={pageSize} options={PAGE_SIZE_OPTIONS} onChange={setPageSize} />
           {data && (
-            <div className="relative">
-              <div className="absolute inset-0 translate-x-1 translate-y-1 bg-black" />
-              <span className="relative border-2 border-black shadow-none px-3 py-1.5 bg-cyan font-extrabold text-sm block">
-                {data.count} image{data.count !== 1 ? 's' : ''}
-              </span>
-            </div>
+            <NeoBadge accent="bg-cyan" variant="flat">
+              {data.count} image{data.count !== 1 ? 's' : ''}
+            </NeoBadge>
           )}
         </div>
       </div>
 
       {isLoading && (
-        <div className="relative">
-          <div className="absolute inset-0 translate-x-2 translate-y-2 bg-black border-2 border-black" />
-          <div className="relative border-2 border-black bg-cyan p-5 sm:p-6 font-bold text-sm">
-            <span className="font-extrabold uppercase tracking-wide">Loading...</span>
-          </div>
-        </div>
+        <NeoCard accent="bg-cyan" className="p-5 sm:p-6 font-bold text-sm">
+          <span className="uppercase tracking-wide">Loading...</span>
+        </NeoCard>
       )}
 
       {error && (
-        <div className="relative">
-          <div className="absolute inset-0 translate-x-2 translate-y-2 bg-black border-2 border-black" />
-          <div className="relative border-2 border-black bg-pink p-5 sm:p-6 font-bold text-sm">
-            <span className="font-extrabold uppercase tracking-wide text-base block mb-1">
-              Failed to load
-            </span>
-            {error.message}
-          </div>
-        </div>
+        <NeoCard accent="bg-pink" className="p-5 sm:p-6 font-bold text-sm">
+          <span className="uppercase tracking-wide text-base block mb-1">Failed to load</span>
+          {error.message}
+        </NeoCard>
       )}
 
       {data && data.items.length === 0 && (
-        <div className="relative max-w-md mx-auto mt-12">
-          <div className="absolute inset-0 translate-x-3 translate-y-3 bg-cyan border-2 border-black" />
-          <div className="relative border-2 border-black bg-yellow p-10 text-center">
-            <p className="text-5xl mb-4">🖼️</p>
-            <p className="text-xl sm:text-2xl font-extrabold uppercase tracking-tight mb-2">
-              {tag ? `No images with tag "${tag}"` : 'No images yet!'}
-            </p>
-            <div className="border-t-2 border-black my-4" />
-            <p className="font-bold text-sm text-black/60 mb-6">
-              {tag
-                ? 'Try a different tag or clear the filter.'
-                : 'Upload some images to get started.'}
-            </p>
-            {tag ? (
-              <NeoButton variant="black" onClick={() => setTag(null)}>
-                Clear filter
-              </NeoButton>
-            ) : (
-              <NeoButton variant="black" onClick={() => navigate('/upload')}>
-                Upload Images →
-              </NeoButton>
-            )}
-          </div>
-        </div>
+        <NeoCard
+          variant="layered"
+          accent="bg-yellow"
+          offset={2.5}
+          offsetAccent="bg-cyan"
+          className="max-w-md mx-auto mt-12"
+          contentClassName="py-10 px-6 text-center"
+        >
+          <p className="text-5xl mb-4">🖼️</p>
+          <p className="text-xl sm:text-2xl font-bold uppercase tracking-tight mb-2">
+            {tag ? `No images with tag "${tag}"` : 'No images yet!'}
+          </p>
+          <div className="border-t-2 border-gray-800 my-4" />
+          <p className="font-bold text-sm text-gray-600 mb-6">
+            {tag
+              ? 'Try a different tag or clear the filter.'
+              : 'Upload some images to get started.'}
+          </p>
+          {tag ? (
+            <NeoButton variant="black" onClick={() => setTag(null)}>
+              Clear filter
+            </NeoButton>
+          ) : (
+            <NeoButton variant="black" onClick={() => navigate('/upload')}>
+              Upload Images →
+            </NeoButton>
+          )}
+        </NeoCard>
       )}
 
       {data && data.items.length > 0 && (
@@ -232,8 +227,10 @@ export function GalleryPage() {
         {editTarget && (
           <div className="flex flex-col gap-4">
             <NeoInput label="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-extrabold uppercase tracking-widest">Tags</label>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold uppercase tracking-wide text-gray-600">
+                Tags
+              </label>
               <div className="flex gap-2">
                 <NeoInput
                   placeholder="Add tag..."

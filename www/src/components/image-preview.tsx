@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { imageUrl } from '@/api/client'
 import type { ImageMeta } from '@/api/types'
 import { NeoButton } from '@/components/neo-button'
+import { NeoCard } from '@/components/neo-card'
 import { NeoTag } from '@/components/neo-tag'
 
 interface Props {
@@ -33,11 +34,13 @@ export function ImagePreview({ image, onClose, onViewSimilar, onTagClick }: Prop
       style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
       onClick={onClose}
     >
-      <div
-        className="bg-white border border-black shadow-[6px_6px_0px_#1a1a1a] w-full sm:max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden"
+      <NeoCard
+        accent="bg-white"
+        shadow={6}
+        className="w-full sm:max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-black px-4 py-3 bg-yellow/60 shrink-0">
+        <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3 bg-yellow/60 shrink-0">
           <h2 className="font-semibold text-sm truncate pr-3">{image.name}</h2>
           <NeoButton variant="black" size="sm" onClick={onClose}>
             ✕
@@ -53,7 +56,7 @@ export function ImagePreview({ image, onClose, onViewSimilar, onTagClick }: Prop
           />
         </div>
 
-        <div className="border-t border-black px-4 py-3 shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="border-t border-gray-800 px-4 py-3 shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-3">
           {image.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 flex-1">
               {image.tags.map((tag) => (
@@ -79,18 +82,20 @@ export function ImagePreview({ image, onClose, onViewSimilar, onTagClick }: Prop
                 Find Similar
               </NeoButton>
             )}
-            <a
+            <NeoButton
               href={imageUrl(image.id)}
               download={image.name}
               target="_blank"
               rel="noreferrer"
-              className="flex-1 sm:flex-none text-center border border-black shadow-[3px_3px_0px_#1a1a1a] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] transition-all duration-75 px-3 py-1.5 text-sm font-medium bg-lime/80 cursor-pointer"
+              variant="lime"
+              size="sm"
+              className="flex-1 sm:flex-none"
             >
               Download
-            </a>
+            </NeoButton>
           </div>
         </div>
-      </div>
+      </NeoCard>
     </div>
   )
 }

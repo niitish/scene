@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { NeoButton } from '@/components/neo-button'
+import { NeoCard } from '@/components/neo-card'
 
 interface Props {
   open: boolean
@@ -30,18 +31,20 @@ export function Modal({ open, onClose, title, children }: Props) {
       style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
       onClick={onClose}
     >
-      <div
-        className="bg-white border border-black shadow-[6px_6px_0px_#1a1a1a] w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto"
+      <NeoCard
+        accent="bg-white"
+        shadow={6}
+        className="w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-black px-4 py-3 bg-yellow/60 sticky top-0">
+        <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3 bg-yellow/60 sticky top-0">
           <h2 className="font-bold text-sm uppercase tracking-wide">{title}</h2>
           <NeoButton variant="black" size="sm" onClick={onClose}>
             ✕
           </NeoButton>
         </div>
         <div className="p-4 sm:p-5">{children}</div>
-      </div>
+      </NeoCard>
     </div>
   )
 }

@@ -8,7 +8,8 @@ import { SearchPage } from '@/pages/search-page'
 import { SimilarPage } from '@/pages/similar-page'
 import { UploadPage } from '@/pages/upload-page'
 import { NotFoundPage } from '@/pages/not-found-page'
-import { AuthProvider } from '@/auth-context'
+import { LandingPage } from '@/pages/landing-page'
+import { AuthProvider } from '@/auth-provider'
 import { RequireAuth } from '@/components/require-auth'
 import { SWRConfig } from 'swr'
 import '@/index.css'
@@ -27,6 +28,7 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route
               element={
@@ -35,7 +37,6 @@ createRoot(document.getElementById('root')!).render(
                 </RequireAuth>
               }
             >
-              <Route index element={<Navigate to="/gallery" replace />} />
               <Route path="gallery" element={<GalleryPage />} />
               <Route path="upload" element={<UploadPage />} />
               <Route path="search" element={<SearchPage />} />

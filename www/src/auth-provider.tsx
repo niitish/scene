@@ -1,16 +1,8 @@
-import { createContext, useContext, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import useSWR from 'swr'
 import { fetcher, meKey, logout as apiLogout } from '@/api/client'
 import type { UserResponse } from '@/api/types'
-
-interface AuthContextValue {
-  user: UserResponse | null
-  loading: boolean
-  logout: () => Promise<void>
-  mutate: () => void
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null)
+import { AuthContext } from '@/auth-context'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { data, error, isLoading, mutate } = useSWR<UserResponse>(meKey(), fetcher, {
@@ -30,10 +22,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   )
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
 }

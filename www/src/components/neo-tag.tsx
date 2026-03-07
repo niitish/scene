@@ -22,7 +22,7 @@ function tagColor(label: string) {
 export function NeoTag({ label, onRemove, onClick }: Props) {
   const className = `
     inline-flex items-center gap-1
-    border border-black/60
+    border border-gray-600
     px-2 py-0.5
     text-xs font-medium tracking-wide
     ${tagColor(label)}

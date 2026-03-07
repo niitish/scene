@@ -1,4 +1,7 @@
 import { useNavigate } from 'react-router'
+import { NeoBadge } from '@/components/neo-badge'
+import { NeoButton } from '@/components/neo-button'
+import { NeoCard } from '@/components/neo-card'
 
 export function NotFoundPage() {
   const navigate = useNavigate()
@@ -6,53 +9,50 @@ export function NotFoundPage() {
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center p-6 overflow-hidden relative">
       <div className="absolute inset-0 pointer-events-none select-none overflow-hidden">
-        <span className="absolute top-8 left-10 text-5xl font-black text-black/5 rotate-[-15deg]">
+        <span className="absolute top-8 left-10 text-5xl font-extrabold text-gray-800/20 rotate-[-15deg]">
           SCENE
         </span>
-        <span className="absolute bottom-16 right-12 text-4xl font-black text-black/5 rotate-12">
+        <span className="absolute bottom-16 right-12 text-4xl font-extrabold text-gray-800/20 rotate-12">
           404
         </span>
-        <div className="absolute top-1/4 right-1/4 w-32 h-32 border-2 border-black/5 rotate-12" />
-        <div className="absolute bottom-1/3 left-1/5 w-20 h-20 border-2 border-black/5 rotate-[-8deg]" />
+        <div className="absolute top-1/4 right-1/4 w-32 h-32 border-2 border-gray-800/20 rotate-12" />
+        <div className="absolute bottom-1/3 left-1/5 w-20 h-20 border-2 border-gray-800/20 rotate-[-8deg]" />
       </div>
 
       <div className="relative w-full max-w-lg">
-        <div className="absolute inset-0 translate-x-3 translate-y-3 bg-pink border-2 border-black" />
-        <div className="absolute inset-0 translate-x-1.5 translate-y-1.5 bg-cyan border-2 border-black" />
-
-        <div className="relative border-2 border-black bg-yellow p-10 text-center">
-          <div className="inline-block border-2 border-black bg-black text-yellow font-extrabold text-xs uppercase tracking-widest px-3 py-1 mb-6">
+        <NeoCard
+          variant="layered"
+          accent="bg-yellow"
+          offset={2.5}
+          offsetAccent="bg-pink"
+          contentClassName="py-10 px-6 text-center"
+        >
+          <NeoBadge accent="bg-gray-800" className="text-yellow mb-6 shadow-[2px_2px_0px_#f472a8]">
             Error
-          </div>
+          </NeoBadge>
 
-          <div className="font-black text-[7rem] leading-none tracking-tighter text-black mb-1 font-mono">
+          <div className="font-extrabold text-[7rem] leading-none tracking-tighter text-gray-800 mb-1 font-mono">
             404
           </div>
 
-          <div className="border-t-2 border-black my-5" />
+          <div className="border-t-2 border-gray-800 my-5" />
 
-          <h1 className="text-xl font-extrabold uppercase tracking-tight text-black mb-2">
+          <h1 className="text-gray-800 text-xl font-bold uppercase tracking-tight mb-2">
             Page not found
           </h1>
-          <p className="text-sm font-medium text-black/60 mb-8 max-w-xs mx-auto leading-relaxed">
+          <p className="text-sm font-medium text-gray-600 mb-8 max-w-xs mx-auto leading-relaxed">
             This page doesn't exist. Maybe it was deleted, or you followed a bad link.
           </p>
 
           <div className="flex gap-3 justify-center flex-wrap">
-            <button
-              onClick={() => navigate(-1)}
-              className="border-2 border-black bg-white font-extrabold uppercase tracking-wide px-5 py-2 text-sm shadow-[3px_3px_0px_#1a1a1a] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0px_#1a1a1a] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all cursor-pointer"
-            >
+            <NeoButton variant="white" display onClick={() => navigate(-1)}>
               ← Go back
-            </button>
-            <button
-              onClick={() => navigate('/', { replace: true })}
-              className="border-2 border-black bg-black text-yellow font-extrabold uppercase tracking-wide px-5 py-2 text-sm shadow-[3px_3px_0px_#1a1a1a] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0px_#1a1a1a] active:translate-x-[3px] active:translate-y-[3px] active:shadow-none transition-all cursor-pointer"
-            >
+            </NeoButton>
+            <NeoButton variant="black" display onClick={() => navigate('/', { replace: true })}>
               Go home →
-            </button>
+            </NeoButton>
           </div>
-        </div>
+        </NeoCard>
       </div>
     </div>
   )

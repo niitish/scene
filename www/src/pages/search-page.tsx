@@ -4,13 +4,15 @@ import useSWR from 'swr'
 import { fetcher, searchKey } from '@/api/client'
 import type { ImageMeta, SimilarityListResponse } from '@/api/types'
 import { ImageCard } from '@/components/image-card'
+import { NeoBadge } from '@/components/neo-badge'
 import { NeoButton } from '@/components/neo-button'
+import { NeoCard } from '@/components/neo-card'
 import { NeoInput } from '@/components/neo-input'
 import { PageSizeSelect } from '@/components/page-size-select'
 import { Pagination } from '@/components/pagination'
 import type { OutletContext } from '@/outlet-context'
 
-const PAGE_SIZE_OPTIONS = [20, 50, 100]
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100]
 
 export function SearchPage() {
   const { setPreview } = useOutletContext<OutletContext>()
@@ -71,96 +73,98 @@ export function SearchPage() {
   return (
     <div>
       <div className="mb-8">
-        <div className="inline-block border-2 border-black bg-yellow font-extrabold text-xs uppercase tracking-widest px-3 py-1 mb-3 shadow-[2px_2px_0px_#1a1a1a] -rotate-1">
+        <NeoBadge accent="bg-yellow" rotate={-1} className="mb-3">
           Semantic Search
-        </div>
-        <h1 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter leading-none">
+        </NeoBadge>
+        <h1 className="text-gray-800 text-4xl sm:text-5xl font-extrabold uppercase tracking-tighter leading-none">
           Search
         </h1>
       </div>
 
-      <div className="relative mb-8">
-        <div className="absolute inset-0 translate-x-2.5 translate-y-2.5 bg-black border-2 border-black" />
-        <div className="relative border-2 border-black bg-white p-5 sm:p-6">
-          <p className="font-extrabold text-xs uppercase tracking-widest text-black/40 mb-4">
-            Describe what you're looking for
-          </p>
-          <div className="flex flex-col sm:flex-row sm:items-stretch gap-2 sm:gap-3">
-            <NeoInput
-              placeholder="e.g. sunset over mountains, a red car..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSearch()
-              }}
-              className="w-full"
-            />
-            <NeoButton
-              variant="yellow"
-              onClick={handleSearch}
-              disabled={!inputValue.trim()}
-              className="w-full sm:w-auto sm:self-stretch sm:text-base"
-            >
-              Search
-            </NeoButton>
-          </div>
+      <NeoCard
+        variant="layered"
+        accent="bg-white"
+        offset={2.5}
+        className="mb-8"
+        contentClassName="p-5 sm:p-6"
+      >
+        <p className="font-bold text-xs uppercase tracking-widest text-gray-600 mb-4">
+          Describe what you're looking for
+        </p>
+        <div className="flex flex-col sm:flex-row sm:items-stretch gap-2 sm:gap-3">
+          <NeoInput
+            placeholder="e.g. sunset over mountains, a red car..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSearch()
+            }}
+            className="w-full"
+          />
+          <NeoButton
+            variant="yellow"
+            onClick={handleSearch}
+            disabled={!inputValue.trim()}
+            className="w-full sm:w-auto sm:self-stretch sm:text-base"
+          >
+            Search
+          </NeoButton>
         </div>
-      </div>
+      </NeoCard>
 
       {urlQuery && (
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-extrabold text-sm uppercase tracking-widest text-black/50">
-              Results for:
-            </span>
-            <div className="relative inline-block">
-              <div className="absolute inset-0 translate-x-1 translate-y-1 bg-black" />
-              <span className="relative border-2 border-black bg-yellow px-3 py-1 font-extrabold text-sm block">
-                "{urlQuery}"
-              </span>
-            </div>
-            {data && <span className="font-bold text-black/50 text-sm">— {data.count} found</span>}
+            <span className="text-sm font-bold text-gray-500">Results for:</span>
+            <NeoBadge accent="bg-lime" variant="flat" className="border!">
+              "{urlQuery}"
+            </NeoBadge>
           </div>
-          <PageSizeSelect value={pageSize} options={PAGE_SIZE_OPTIONS} onChange={setPageSize} />
+          <div className="flex items-center gap-3 mt-1">
+            <PageSizeSelect value={pageSize} options={PAGE_SIZE_OPTIONS} onChange={setPageSize} />
+            {data && (
+              <NeoBadge accent="bg-lime" variant="flat">
+                {data.count} image{data.count !== 1 ? 's' : ''}
+              </NeoBadge>
+            )}
+          </div>
         </div>
       )}
 
       {isLoading && (
-        <div className="relative">
-          <div className="absolute inset-0 translate-x-2 translate-y-2 bg-black border-2 border-black" />
-          <div className="relative border-2 border-black bg-cyan p-5 sm:p-6 font-bold text-sm">
-            <span className="font-extrabold uppercase tracking-wide">Loading...</span>
-          </div>
-        </div>
+        <NeoCard accent="bg-cyan" className="p-5 sm:p-6 font-bold text-sm">
+          <span className="uppercase tracking-wide">Loading...</span>
+        </NeoCard>
       )}
 
       {error && (
-        <div className="relative">
-          <div className="absolute inset-0 translate-x-2 translate-y-2 bg-black border-2 border-black" />
-          <div className="relative border-2 border-black bg-pink p-5 sm:p-6 font-bold text-sm">
-            <span className="font-extrabold uppercase tracking-wide text-base block mb-1">
-              Search failed
-            </span>
-            {error.message}
-          </div>
-        </div>
+        <NeoCard accent="bg-pink" className="p-5 sm:p-6 font-bold text-sm">
+          <span className="uppercase tracking-wide text-base block mb-1">Search failed</span>
+          {error.message}
+        </NeoCard>
       )}
 
       {data && data.items.length === 0 && (
-        <div className="relative max-w-md mx-auto mt-8">
-          <div className="absolute inset-0 translate-x-3 translate-y-3 bg-yellow border-2 border-black" />
-          <div className="relative border-2 border-black bg-white p-10 text-center">
-            <p className="text-5xl mb-4">🔍</p>
-            <p className="text-xl font-extrabold uppercase tracking-tight mb-2">No results found</p>
-            <div className="border-t-2 border-black my-4" />
-            <p className="font-bold text-sm text-black/60">Try a different search query.</p>
-          </div>
-        </div>
+        <NeoCard
+          variant="layered"
+          accent="bg-white"
+          offset={2.5}
+          offsetAccent="bg-yellow"
+          className="max-w-md mx-auto mt-12"
+          contentClassName="py-10 px-6 text-center"
+        >
+          <p className="text-5xl mb-4">🔍</p>
+          <p className="text-xl sm:text-2xl font-bold uppercase tracking-tight mb-2">
+            No results found
+          </p>
+          <div className="border-t-2 border-gray-800 my-4" />
+          <p className="font-bold text-sm text-gray-600">Try a different search query.</p>
+        </NeoCard>
       )}
 
       {data && data.items.length > 0 && (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
             {data.items.map((img) => (
               <ImageCard
                 key={img.id}
@@ -183,19 +187,23 @@ export function SearchPage() {
       )}
 
       {!urlQuery && (
-        <div className="relative max-w-md mx-auto mt-4">
-          <div className="absolute inset-0 translate-x-3 translate-y-3 bg-yellow border-2 border-black" />
-          <div className="relative border-2 border-black bg-white p-10 text-center">
-            <p className="text-5xl mb-4">🔍</p>
-            <p className="font-extrabold text-lg sm:text-xl uppercase tracking-tight mb-2">
-              Enter a query above
-            </p>
-            <div className="border-t-2 border-black my-4" />
-            <p className="font-bold text-sm text-black/50">
-              Use natural language to find images in your collection.
-            </p>
-          </div>
-        </div>
+        <NeoCard
+          variant="layered"
+          accent="bg-yellow"
+          offset={2.5}
+          offsetAccent="bg-cyan"
+          className="max-w-md mx-auto mt-12"
+          contentClassName="py-10 px-6 text-center"
+        >
+          <p className="text-5xl mb-4">🔍</p>
+          <p className="text-xl sm:text-2xl font-bold uppercase tracking-tight mb-2">
+            Enter a query above
+          </p>
+          <div className="border-t-2 border-gray-800 my-4" />
+          <p className="font-bold text-sm text-gray-600">
+            Use natural language to find images in your collection.
+          </p>
+        </NeoCard>
       )}
     </div>
   )

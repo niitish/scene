@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { NeoCard } from '@/components/neo-card'
 
 export type ToastType = 'success' | 'error' | 'info'
 
@@ -26,12 +27,10 @@ function ToastItem({ toast, onRemove }: { toast: ToastMessage; onRemove: (id: nu
   }, [toast.id, onRemove])
 
   return (
-    <div
-      className={`
-        border border-black shadow-[3px_3px_0px_#1a1a1a]
-        px-4 py-3 font-medium text-sm flex items-center gap-3
-        ${typeStyles[toast.type]}
-      `}
+    <NeoCard
+      accent={typeStyles[toast.type]}
+      shadow={3}
+      className="px-4 py-3 font-medium text-sm flex items-center gap-3"
     >
       <span className="flex-1">{toast.message}</span>
       <button
@@ -40,7 +39,7 @@ function ToastItem({ toast, onRemove }: { toast: ToastMessage; onRemove: (id: nu
       >
         ✕
       </button>
-    </div>
+    </NeoCard>
   )
 }
 

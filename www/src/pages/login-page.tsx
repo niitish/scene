@@ -1,8 +1,11 @@
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { githubLoginUrl, googleLoginUrl } from '@/api/client'
-import { useAuth } from '@/auth-context'
+import { useAuth } from '@/use-auth'
 import { GitHubIcon, GoogleIcon } from '@/components/icons'
+import { NeoBadge } from '@/components/neo-badge'
+import { NeoButton } from '@/components/neo-button'
+import { NeoCard } from '@/components/neo-card'
 
 const errorMessages: Record<string, string> = {
   invalid_state: 'Login session expired. Please try again.',
@@ -34,73 +37,70 @@ export function LoginPage() {
   }, [user, loading, navigate])
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4 overflow-hidden relative">
+    <div className="min-h-screen page-bg flex items-center justify-center px-4 overflow-hidden relative">
       {ACCENT_BLOCKS.map((b, i) => (
         <div
           key={i}
-          className={`absolute border-2 border-black ${b.color} ${b.rotate} ${b.w} ${b.h} opacity-60`}
+          className={`absolute border border-gray-800 ${b.color} ${b.rotate} ${b.w} ${b.h} shadow-[2px_2px_0px_rgba(31,41,55,0.3)]`}
           style={{ top: b.top, bottom: b.bottom, left: b.left, right: b.right }}
         />
       ))}
 
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage:
-            'linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px)',
-          backgroundSize: '48px 48px',
-        }}
-      />
-
       <div className="w-full max-w-sm relative z-10">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-5">
-            <div className="bg-black text-yellow font-extrabold text-xs uppercase tracking-widest px-3 py-1.5 border-2 border-black -rotate-1 shadow-[3px_3px_0px_#f0d84a]">
+            <NeoBadge
+              accent="bg-gray-800"
+              rotate={-1}
+              className="text-yellow shadow-[3px_3px_0px_#f0d84a]"
+            >
               Image Gallery
-            </div>
+            </NeoBadge>
           </div>
-          <h1 className="text-7xl font-black uppercase tracking-tighter text-black leading-none">
+          <h1 className="text-gray-800 text-7xl font-extrabold uppercase tracking-tighter leading-none">
             SCENE
           </h1>
           <div className="flex items-center gap-3 mt-3">
-            <div className="h-0.5 w-8 bg-black" />
-            <p className="text-black/50 font-bold text-xs uppercase tracking-widest">
+            <div className="h-0.5 w-8 bg-gray-800" />
+            <p className="text-gray-600 font-bold text-xs uppercase tracking-widest">
               Sign in to continue
             </p>
           </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute inset-0 translate-x-2.5 translate-y-2.5 bg-cyan border-2 border-black" />
-          <div className="relative border-2 border-black bg-white p-8 flex flex-col gap-4">
-            {error && (
-              <div className="border-2 border-black bg-pink px-4 py-3 text-sm font-bold flex items-center gap-2">
-                <span className="text-base leading-none shrink-0">⚠</span>
-                <span>{errorMessages[error] ?? 'Something went wrong. Please try again.'}</span>
-              </div>
-            )}
-
-            <p className="text-xs font-bold uppercase tracking-widest text-black/40 text-center">
-              Choose a provider
-            </p>
-
-            <a
-              href={googleLoginUrl()}
-              className="flex items-center justify-center gap-3 border-2 border-black shadow-[4px_4px_0px_#1a1a1a] bg-white text-black px-5 py-3.5 font-extrabold text-sm uppercase tracking-wide hover:bg-yellow hover:shadow-[2px_2px_0px_#1a1a1a] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all duration-75 cursor-pointer"
+        <NeoCard
+          variant="layered"
+          accent="bg-white"
+          offset={2.5}
+          offsetAccent="bg-cyan"
+          contentClassName="p-8 flex flex-col gap-4"
+        >
+          {error && (
+            <NeoCard
+              variant="flat"
+              accent="bg-pink"
+              border={2}
+              className="px-4 py-3 text-sm font-bold flex items-center gap-2"
             >
-              <GoogleIcon />
-              Continue with Google
-            </a>
+              <span className="text-base leading-none shrink-0">⚠</span>
+              <span>{errorMessages[error] ?? 'Something went wrong. Please try again.'}</span>
+            </NeoCard>
+          )}
 
-            <a
-              href={githubLoginUrl()}
-              className="flex items-center justify-center gap-3 border-2 border-black shadow-[4px_4px_0px_#1a1a1a] bg-black text-white px-5 py-3.5 font-extrabold text-sm uppercase tracking-wide hover:bg-gray-800 hover:shadow-[2px_2px_0px_#1a1a1a] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] transition-all duration-75 cursor-pointer"
-            >
-              <GitHubIcon />
-              Continue with GitHub
-            </a>
-          </div>
-        </div>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-600 text-center">
+            Choose a provider
+          </p>
+
+          <NeoButton href={googleLoginUrl()} variant="white" display fullWidth className="gap-3">
+            <GoogleIcon />
+            Continue with Google
+          </NeoButton>
+
+          <NeoButton href={githubLoginUrl()} variant="black" display fullWidth className="gap-3">
+            <GitHubIcon />
+            Continue with GitHub
+          </NeoButton>
+        </NeoCard>
       </div>
     </div>
   )

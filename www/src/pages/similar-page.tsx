@@ -3,11 +3,13 @@ import useSWR from 'swr'
 import { fetcher, similarKey, thumbUrl } from '@/api/client'
 import type { ImageMeta, SimilarityListResponse } from '@/api/types'
 import { ImageCard } from '@/components/image-card'
+import { NeoBadge } from '@/components/neo-badge'
+import { NeoCard } from '@/components/neo-card'
 import { PageSizeSelect } from '@/components/page-size-select'
 import { Pagination } from '@/components/pagination'
 import type { OutletContext } from '@/outlet-context'
 
-const PAGE_SIZE_OPTIONS = [20, 50, 100]
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100]
 
 export function SimilarPage() {
   const { imageId } = useParams<{ imageId: string }>()
@@ -48,102 +50,98 @@ export function SimilarPage() {
 
   if (!imageId) {
     return (
-      <div className="relative max-w-md">
-        <div className="absolute inset-0 translate-x-2 translate-y-2 bg-black border-2 border-black" />
-        <div className="relative border-2 border-black bg-pink p-6 font-bold">
-          No image ID provided.
-        </div>
-      </div>
+      <NeoCard accent="bg-pink" className="p-5 sm:p-6 font-bold text-sm">
+        No image ID provided.
+      </NeoCard>
     )
   }
 
   return (
     <div>
-      <div className="relative mb-8">
-        <div className="absolute inset-0 translate-x-3 translate-y-3 bg-pink border-2 border-black" />
-        <div className="relative border-2 border-black bg-white overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5">
-            <div className="flex items-center gap-4 sm:gap-5 shrink-0">
-              <button
-                onClick={() => navigate(-1)}
-                className="group flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 border-2 border-black bg-black text-white shrink-0 hover:bg-pink hover:text-black transition-colors cursor-pointer"
-                aria-label="Go back"
-              >
-                <span className="text-lg sm:text-xl font-black group-hover:-translate-x-0.5 transition-transform">
-                  ←
-                </span>
-              </button>
-              <div className="border-2 border-black overflow-hidden shadow-[3px_3px_0px_#1a1a1a] shrink-0">
-                <img
-                  src={thumbUrl(imageId)}
-                  alt="Source"
-                  className="w-14 h-14 sm:w-20 sm:h-20 object-cover block"
-                />
-              </div>
-            </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-tighter leading-tight">
-                Similar images
-              </h1>
-              <p
-                className="font-mono text-xs text-black/40 mt-1 truncate sm:break-all"
-                title={imageId}
-              >
-                {imageId}
-              </p>
-            </div>
+      <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
+        <div>
+          <NeoBadge accent="bg-pink" rotate={-1} className="mb-3">
+            Find Similar
+          </NeoBadge>
+          <h1 className="text-gray-800 text-4xl sm:text-5xl font-extrabold uppercase tracking-tighter leading-none">
+            Similar
+          </h1>
+          <div className="flex items-center gap-3 mt-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="group flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 border-2 border-gray-800 bg-gray-800 text-white shrink-0 hover:bg-pink hover:text-gray-800 transition-colors cursor-pointer"
+              aria-label="Go back"
+            >
+              <span className="text-lg sm:text-xl font-extrabold group-hover:-translate-x-0.5 transition-transform">
+                ←
+              </span>
+            </button>
+            <NeoCard
+              variant="flat"
+              accent="bg-gray-100"
+              border={2}
+              shadow={2}
+              className="overflow-hidden shrink-0"
+            >
+              <img
+                src={thumbUrl(imageId)}
+                alt="Source"
+                className="w-14 h-14 sm:w-20 sm:h-20 object-cover block"
+              />
+            </NeoCard>
+            <p
+              className="font-mono text-xs text-gray-600 truncate sm:max-w-[200px]"
+              title={imageId}
+            >
+              {imageId}
+            </p>
           </div>
         </div>
+        {data && (
+          <div className="flex items-center gap-3 mt-1">
+            <PageSizeSelect value={pageSize} options={PAGE_SIZE_OPTIONS} onChange={setPageSize} />
+            <NeoBadge accent="bg-pink" variant="flat">
+              {data.count} similar image{data.count !== 1 ? 's' : ''} found
+            </NeoBadge>
+          </div>
+        )}
       </div>
 
       {isLoading && (
-        <div className="relative">
-          <div className="absolute inset-0 translate-x-2 translate-y-2 bg-black border-2 border-black" />
-          <div className="relative border-2 border-black bg-cyan p-5 sm:p-6 font-bold text-sm">
-            <span className="font-extrabold uppercase tracking-wide">Loading...</span>
-          </div>
-        </div>
+        <NeoCard accent="bg-cyan" className="p-5 sm:p-6 font-bold text-sm">
+          <span className="uppercase tracking-wide">Loading...</span>
+        </NeoCard>
       )}
 
       {error && (
-        <div className="relative">
-          <div className="absolute inset-0 translate-x-2 translate-y-2 bg-black border-2 border-black" />
-          <div className="relative border-2 border-black bg-pink p-5 sm:p-6 font-bold text-sm">
-            <span className="font-extrabold uppercase tracking-wide text-base block mb-1">
-              Failed to load
-            </span>
-            {error.message}
-          </div>
-        </div>
+        <NeoCard accent="bg-pink" className="p-5 sm:p-6 font-bold text-sm">
+          <span className="uppercase tracking-wide text-base block mb-1">Failed to load</span>
+          {error.message}
+        </NeoCard>
       )}
 
       {data && data.items.length === 0 && (
-        <div className="relative max-w-md mt-4">
-          <div className="absolute inset-0 translate-x-3 translate-y-3 bg-pink border-2 border-black" />
-          <div className="relative border-2 border-black bg-white p-10 text-center">
-            <p className="text-5xl mb-4">🔎</p>
-            <p className="text-xl font-extrabold uppercase tracking-tight mb-2">
-              No similar images found
-            </p>
-            <div className="border-t-2 border-black my-4" />
-            <p className="font-bold text-sm text-black/60 leading-relaxed">
-              Try uploading more images or wait for embeddings to process.
-            </p>
-          </div>
-        </div>
+        <NeoCard
+          variant="layered"
+          accent="bg-yellow"
+          offset={2.5}
+          offsetAccent="bg-pink"
+          className="max-w-md mx-auto mt-12"
+          contentClassName="py-10 px-6 text-center"
+        >
+          <p className="text-5xl mb-4">🔎</p>
+          <p className="text-xl sm:text-2xl font-bold uppercase tracking-tight mb-2">
+            No similar images found
+          </p>
+          <div className="border-t-2 border-gray-800 my-4" />
+          <p className="font-bold text-sm text-gray-600">
+            Try uploading more images or wait for embeddings to process.
+          </p>
+        </NeoCard>
       )}
 
       {data && data.items.length > 0 && (
         <>
-          <div className="mb-5 flex items-center justify-between gap-3 flex-wrap">
-            <div className="relative inline-block">
-              <div className="absolute inset-0 translate-x-1 translate-y-1 bg-black" />
-              <span className="relative border-2 border-black bg-pink px-3 py-1.5 font-extrabold text-sm block">
-                {data.count} similar image{data.count !== 1 ? 's' : ''} found
-              </span>
-            </div>
-            <PageSizeSelect value={pageSize} options={PAGE_SIZE_OPTIONS} onChange={setPageSize} />
-          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
             {data.items.map((img) => (
               <ImageCard

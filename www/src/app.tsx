@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router'
 import { ImagePreview } from '@/components/image-preview'
 import { ToastContainer } from '@/components/toast'
 import { useToast } from '@/components/use-toast'
-import { useAuth } from '@/auth-context'
+import { useAuth } from '@/use-auth'
 import { GitHubIcon } from '@/components/icons'
 import { UserAvatar } from '@/components/user-avatar'
 import type { ImageMeta } from '@/api/types'
@@ -17,8 +17,8 @@ const NAV_ITEMS = [
 const navLinkClass = (isActive: boolean, activeAccent: string) =>
   `px-3 py-2 font-bold text-xs sm:text-sm uppercase tracking-wide border transition-all duration-75 cursor-pointer ${
     isActive
-      ? `${activeAccent} text-black border-black shadow-[2px_2px_0px_rgba(255,255,255,0.3)]`
-      : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500'
+      ? `${activeAccent} text-gray-800 border-gray-800 shadow-[2px_2px_0px_rgba(255,255,255,0.3)]`
+      : 'border-transparent text-muted hover:text-white hover:border-gray-500'
   }`
 
 export function App() {
@@ -34,16 +34,8 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-bg relative">
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage:
-            'linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px)',
-          backgroundSize: '48px 48px',
-        }}
-      />
-      <header className="border-b border-black/80 bg-gray-900 text-white sticky top-0 z-40">
+    <div className="min-h-screen page-bg relative">
+      <header className="border-b border-gray-700 bg-gray-900 text-white sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 flex items-center h-14 gap-2">
           <button
             onClick={() => navigate('/gallery')}
@@ -67,7 +59,7 @@ export function App() {
               to="/similar"
               className={({ isActive }) =>
                 isActive
-                  ? 'px-3 py-2 font-bold text-xs sm:text-sm uppercase tracking-wide border bg-pink/80 text-black border-black shadow-[2px_2px_0px_rgba(255,255,255,0.3)] cursor-pointer'
+                  ? 'px-3 py-2 font-bold text-xs sm:text-sm uppercase tracking-wide border bg-pink/80 text-gray-800 border-gray-800 shadow-[2px_2px_0px_rgba(255,255,255,0.3)] cursor-pointer'
                   : 'hidden'
               }
             >
@@ -124,8 +116,8 @@ export function App() {
                 className={({ isActive }) =>
                   `px-5 py-3 font-bold text-sm uppercase tracking-wide border-b border-gray-800 transition-colors ${
                     isActive
-                      ? `${activeAccent} text-black`
-                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                      ? `${activeAccent} text-gray-800`
+                      : 'text-muted hover:text-white hover:bg-gray-800'
                   }`
                 }
               >
@@ -137,7 +129,7 @@ export function App() {
               onClick={() => setMenuOpen(false)}
               className={({ isActive }) =>
                 isActive
-                  ? 'px-5 py-3 font-bold text-sm uppercase tracking-wide bg-pink/80 text-black border-b border-gray-800'
+                  ? 'px-5 py-3 font-bold text-sm uppercase tracking-wide bg-pink/80 text-gray-800 border-b border-gray-800'
                   : 'hidden'
               }
             >

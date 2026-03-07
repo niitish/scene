@@ -16,14 +16,14 @@ export function NeoInput({ label, className = '', id, ...props }: Props) {
         id={id}
         {...props}
         className={`
-          border border-black
-          shadow-[3px_3px_0px_#1a1a1a]
+          border border-gray-800
+          shadow-[3px_3px_0px_#1f2937]
           px-3 py-2.5
           bg-white
           text-sm font-medium
-          focus:outline-none focus:shadow-[4px_4px_0px_#1a1a1a]
+          focus:outline-none focus:shadow-[4px_4px_0px_#1f2937]
           transition-shadow duration-75
-          placeholder:text-gray-400
+          placeholder:text-muted
           ${className}
         `}
       />

@@ -34,7 +34,7 @@ class Image(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.now)
     tags: list[str] = Field(default=[], sa_type=PG_ARRAY(String))
     embeddings: list[float] | None = Field(sa_type=VECTOR(512), default=None)
-    hash: str | None = Field(default=None)
+    hash: str | None = Field(default=None, unique=True)
     uploaded_by: UUID | None = Field(
         default=None, foreign_key="user.id", ondelete="SET NULL"
     )

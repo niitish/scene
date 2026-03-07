@@ -13,7 +13,7 @@ export function PageSizeSelect({ value, options, onChange }: Props) {
       <select
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="border border-gray-800 bg-white px-2 py-1 text-xs font-bold uppercase cursor-pointer"
+        className="text-gray-800 border border-gray-800 bg-white px-2 py-1 text-xs font-bold uppercase cursor-pointer"
       >
         {options.map((o) => (
           <option key={o} value={o}>

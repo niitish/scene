@@ -9,6 +9,7 @@ import aiofiles.os
 import uuid_utils
 from fastapi import APIRouter, HTTPException, UploadFile
 from fastapi.responses import FileResponse
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import func, select
 
 from app.db import SessionDep
@@ -40,6 +41,7 @@ _ERRORS = {
     400: {"model": ErrorResponse},
     403: {"model": ErrorResponse},
     404: {"model": ErrorResponse},
+    409: {"model": ErrorResponse},
     422: {"model": ErrorResponse},
     500: {"model": ErrorResponse},
 }
@@ -57,7 +59,15 @@ _IMAGE_COLS = (
 )
 
 
-@router.post("/", responses={400: _ERRORS[400], 403: _ERRORS[403], 500: _ERRORS[500]})
+@router.post(
+    "/",
+    responses={
+        400: _ERRORS[400],
+        403: _ERRORS[403],
+        409: _ERRORS[409],
+        500: _ERRORS[500],
+    },
+)
 async def upload_file(
     file: UploadFile, session: SessionDep, current_user: WriteUser
 ) -> UploadResponse:
@@ -108,6 +118,18 @@ async def upload_file(
     except HTTPException as e:
         logger.error(f"Error uploading image: {e.detail}")
         raise
+
+    except IntegrityError as e:
+        await session.rollback()
+        try:
+            if file_path is not None:
+                await aiofiles.os.remove(file_path)
+        except Exception:
+            pass
+        logger.error(f"Duplicate image (race condition): {e}")
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT, detail="Image already exists"
+        )
 
     except Exception as e:
         await session.rollback()

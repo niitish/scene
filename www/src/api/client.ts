@@ -45,7 +45,8 @@ export async function uploadImage(file: File): Promise<UploadResponse> {
   const res = await fetch(`${BASE}/`, { method: 'POST', body: form })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
-    throw Object.assign(new Error(err.detail ?? 'Upload failed'), { status: res.status })
+    const detail = Array.isArray(err.detail) ? err.detail[0]?.msg : err.detail
+    throw Object.assign(new Error(detail ?? 'Upload failed'), { status: res.status })
   }
   return res.json()
 }

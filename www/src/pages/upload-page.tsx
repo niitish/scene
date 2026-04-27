@@ -1,91 +1,27 @@
-import { useCallback, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router'
 import { useSWRConfig } from 'swr'
-import { listKey, uploadImage } from '@/api/client'
 import { NeoBadge } from '@/components/neo-badge'
 import { NeoButton } from '@/components/neo-button'
 import { NeoCard } from '@/components/neo-card'
+import { useUploadQueue } from '@/hooks/use-upload-queue'
 import type { OutletContext } from '@/outlet-context'
-
-interface UploadItem {
-  file: File
-  preview: string
-  status: 'pending' | 'uploading' | 'done' | 'error'
-  error?: string
-}
 
 export function UploadPage() {
   const { addToast } = useOutletContext<OutletContext>()
   const navigate = useNavigate()
-  const [items, setItems] = useState<UploadItem[]>([])
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const { mutate } = useSWRConfig()
 
-  const addFiles = useCallback(
-    (files: FileList | File[]) => {
-      const arr = Array.from(files).filter((f) => f.type.startsWith('image/'))
-      if (!arr.length) {
-        addToast('Only image files are accepted', 'error')
-        return
-      }
-      setItems((prev) => [
-        ...prev,
-        ...arr.map((f) => ({
-          file: f,
-          preview: URL.createObjectURL(f),
-          status: 'pending' as const,
-        })),
-      ])
-    },
-    [addToast]
-  )
+  const { items, addFiles, removeItem, uploadAll, clearAll, pendingCount, doneCount, isUploading } =
+    useUploadQueue({ addToast, mutate })
 
   function onDrop(e: React.DragEvent) {
     e.preventDefault()
     setDragging(false)
     addFiles(e.dataTransfer.files)
   }
-
-  function removeItem(idx: number) {
-    setItems((prev) => {
-      URL.revokeObjectURL(prev[idx].preview)
-      return prev.filter((_, i) => i !== idx)
-    })
-  }
-
-  async function uploadAll() {
-    const pending = items.filter((i) => i.status === 'pending' || i.status === 'error')
-    if (!pending.length) return
-
-    for (const item of pending) {
-      setItems((prev) =>
-        prev.map((i) => (i.file === item.file ? { ...i, status: 'uploading' } : i))
-      )
-      try {
-        await uploadImage(item.file)
-        setItems((prev) => prev.map((i) => (i.file === item.file ? { ...i, status: 'done' } : i)))
-      } catch (e: unknown) {
-        const msg = (e as Error).message ?? 'Upload failed'
-        setItems((prev) =>
-          prev.map((i) => (i.file === item.file ? { ...i, status: 'error', error: msg } : i))
-        )
-      }
-    }
-
-    await mutate(listKey(1, 20))
-    addToast('Upload complete!', 'success')
-  }
-
-  const { pendingCount, doneCount, isUploading } = items.reduce(
-    (acc, i) => {
-      if (i.status === 'uploading') acc.isUploading = true
-      if (i.status === 'pending' || i.status === 'error') acc.pendingCount++
-      if (i.status === 'done') acc.doneCount++
-      return acc
-    },
-    { pendingCount: 0, doneCount: 0, isUploading: false }
-  )
 
   return (
     <div>
@@ -98,45 +34,47 @@ export function UploadPage() {
         </h1>
       </div>
 
-      <NeoCard
-        variant="layered"
-        accent={dragging ? 'bg-yellow' : 'bg-white'}
-        offset={2.5}
-        offsetAccent={dragging ? 'bg-cyan' : 'bg-gray-800'}
-        className="mb-8"
-        contentClassName={`p-10 sm:p-16 text-center cursor-pointer transition-all duration-75 ${
-          !dragging
-            ? 'hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[3px] active:translate-y-[3px]'
-            : ''
-        }`}
-        onDragOver={(e) => {
-          e.preventDefault()
-          setDragging(true)
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        onClick={() => inputRef.current?.click()}
-      >
-        <div
-          className={`text-5xl mb-4 transition-transform duration-100 ${dragging ? 'scale-125' : ''}`}
+      {!isUploading && (
+        <NeoCard
+          variant="layered"
+          accent={dragging ? 'bg-yellow' : 'bg-white'}
+          offset={2.5}
+          offsetAccent={dragging ? 'bg-cyan' : 'bg-gray-800'}
+          className="mb-8"
+          contentClassName={`p-10 sm:p-16 text-center cursor-pointer transition-all duration-75 ${
+            !dragging
+              ? 'hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[3px] active:translate-y-[3px]'
+              : ''
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragging(true)
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+          onClick={() => inputRef.current?.click()}
         >
-          📁
-        </div>
-        <p className="font-bold text-xl sm:text-2xl uppercase tracking-tight mb-1">
-          {dragging ? 'Drop to add!' : 'Drop images here'}
-        </p>
-        <p className="font-bold text-gray-600 text-sm uppercase tracking-wide">
-          or click to browse
-        </p>
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => e.target.files && addFiles(e.target.files)}
-        />
-      </NeoCard>
+          <div
+            className={`text-5xl mb-4 transition-transform duration-100 ${dragging ? 'scale-125' : ''}`}
+          >
+            📁
+          </div>
+          <p className="font-bold text-xl sm:text-2xl uppercase tracking-tight mb-1">
+            {dragging ? 'Drop to add!' : 'Drop images here'}
+          </p>
+          <p className="font-bold text-gray-600 text-sm uppercase tracking-wide">
+            or click to browse
+          </p>
+          <input
+            ref={inputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => e.target.files && addFiles(e.target.files)}
+          />
+        </NeoCard>
+      )}
 
       {items.length > 0 && (
         <div>
@@ -164,10 +102,7 @@ export function UploadPage() {
                 variant="white"
                 className="flex-1 sm:flex-none"
                 disabled={isUploading}
-                onClick={() => {
-                  items.forEach((i) => URL.revokeObjectURL(i.preview))
-                  setItems([])
-                }}
+                onClick={clearAll}
               >
                 Clear All
               </NeoButton>
@@ -175,8 +110,8 @@ export function UploadPage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
-            {items.map((item, idx) => (
-              <NeoCard key={item.preview} accent="bg-white" className="overflow-hidden">
+            {items.map((item) => (
+              <NeoCard key={item.id} accent="bg-white" className="overflow-hidden">
                 <div className="relative border-b-2 border-gray-800" style={{ aspectRatio: '4/3' }}>
                   <img
                     src={item.preview}
@@ -204,7 +139,7 @@ export function UploadPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
-                        removeItem(idx)
+                        removeItem(item.id)
                       }}
                       className="absolute top-1.5 right-1.5 bg-gray-800 text-white border-2 border-white w-6 h-6 flex items-center justify-center font-bold text-xs cursor-pointer hover:bg-gray-700 transition-colors"
                     >

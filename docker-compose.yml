@@ -12,6 +12,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: scene
+    ports:
+      - "5432:5432"
     volumes:
       - postgres:/var/lib/postgresql
       - ./app/db/init-pgvector.sql:/docker-entrypoint-initdb.d/init-pgvector.sql
@@ -71,12 +73,12 @@ services:
         condition: service_healthy
 
   pgadmin:
+    profiles: [pgadmin]
     logging:
       driver: json-file
       options:
         max-size: "32m"
         max-file: "5"
-    profiles: [pgadmin]
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com

@@ -1,11 +1,5 @@
 from datetime import datetime
 
-from authlib.integrations.starlette_client import OAuth
-from fastapi import APIRouter, Request, Response
-from fastapi.responses import RedirectResponse
-from sqlmodel import select
-from starlette.config import Config
-
 from app.db import SessionDep
 from app.db.model import User
 from app.db.types import UserResponse
@@ -18,6 +12,11 @@ from app.helpers.constants import (
 )
 from app.helpers.deps import CurrentUser, create_access_token, set_auth_cookie
 from app.helpers.logger import logger
+from authlib.integrations.starlette_client import OAuth
+from fastapi import APIRouter, Request, Response
+from fastapi.responses import RedirectResponse
+from sqlmodel import select
+from starlette.config import Config
 
 router = APIRouter()
 

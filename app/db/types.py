@@ -1,9 +1,15 @@
 from datetime import datetime
+from typing import TypedDict
 from uuid import UUID
 
 from pydantic import BaseModel
 
 from app.helpers.enums import UserRole
+
+
+class ImageExistsResult(TypedDict):
+    exists: bool
+    hash: str
 
 
 class UploadResponse(BaseModel):

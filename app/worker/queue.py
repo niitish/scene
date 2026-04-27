@@ -1,9 +1,11 @@
 import asyncio
 import logging
+import os
 from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import text
+from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.db import async_session
@@ -82,6 +84,16 @@ async def _handle_job(job: dict) -> None:
                                 f"THUMB: Image {job['image_id']} not found"
                             )
                         thumb_path = await asyncio.to_thread(generate_thumb, image.path)
+                        # if the image was deleted while the thumb was being generated, remove the file too.
+                        exists_result = await session.exec(
+                            select(Image.id).where(Image.id == job["image_id"])
+                        )
+                        if exists_result.first() is None:
+                            try:
+                                await asyncio.to_thread(os.remove, thumb_path)
+                            except FileNotFoundError:
+                                pass
+                            return
                         image.thumb = thumb_path
                         image.updated_at = datetime.now()
                         session.add(image)

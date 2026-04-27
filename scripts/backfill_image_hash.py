@@ -7,8 +7,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from PIL import Image as PILImage
-from sqlmodel import select, or_
-
+from sqlmodel import or_, select
 
 from app.db import async_session
 from app.db.model import Image

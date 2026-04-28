@@ -16,28 +16,30 @@ function getInitials(name?: string | null, email?: string | null): string {
 }
 
 const sizeClasses = {
-  sm: 'w-6 h-6 text-xs',
-  md: 'w-7 h-7 text-xs',
+  sm: 'w-8 h-8 text-[10px]',
+  md: 'w-10 h-10 text-xs',
 }
 
 export function UserAvatar({ name, email, avatarUrl, size = 'md' }: Props) {
   const [imgFailed, setImgFailed] = useState(false)
   const initials = getInitials(name, email)
-  const cls = `${sizeClasses[size]} border border-gray-600 shrink-0`
+  const cls = `${sizeClasses[size]} border-2 border-brutal-black shrink-0 rounded-base`
 
   if (avatarUrl && !imgFailed) {
     return (
       <img
         src={avatarUrl}
         alt={name ?? email ?? 'User'}
-        className={`${cls} object-cover`}
+        className={`${cls} object-cover shadow-base`}
         onError={() => setImgFailed(true)}
       />
     )
   }
 
   return (
-    <div className={`${cls} bg-yellow flex items-center justify-center text-gray-800 font-bold`}>
+    <div
+      className={`${cls} bg-brutal-yellow flex items-center justify-center text-brutal-black font-bold uppercase tracking-tighter shadow-base`}
+    >
       {initials}
     </div>
   )

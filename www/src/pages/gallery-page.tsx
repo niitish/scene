@@ -118,79 +118,73 @@ export function GalleryPage() {
 
   return (
     <div>
-      <div className="flex items-start justify-between mb-8 gap-4 flex-wrap">
+      <div className="flex items-start justify-between mb-8 gap-6 flex-wrap border-b-2 border-brutal-black pb-8">
         <div>
-          <NeoBadge accent="bg-cyan" rotate={-1} className="mb-3">
-            Your Collection
-          </NeoBadge>
-          <h1 className="text-gray-800 text-4xl sm:text-5xl font-extrabold uppercase tracking-tighter leading-none">
-            Gallery
+          <NeoBadge className="mb-4">YOUR COLLECTION</NeoBadge>
+          <h1 className="text-brutal-black text-6xl sm:text-7xl font-black uppercase tracking-tighter leading-none">
+            GALLERY
           </h1>
           {tag && (
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-sm font-bold text-gray-500">Filtered by:</span>
-              <NeoBadge accent="bg-yellow" variant="flat" className="border!">
+            <div className="flex items-center gap-4 mt-6">
+              <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">
+                FILTERED BY:
+              </span>
+
+              <NeoBadge>
                 {tag}
                 <button
                   onClick={() => setTag(null)}
-                  className="ml-0.5 font-bold hover:text-red-600 cursor-pointer leading-none"
+                  className="ml-2 hover:text-white transition-colors cursor-pointer leading-none"
                   aria-label="Clear tag filter"
                 >
-                  ×
+                  ✕
                 </button>
               </NeoBadge>
             </div>
           )}
         </div>
-        <div className="flex items-center gap-3 mt-1">
+        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-4 mt-2 sm:mt-0">
           <PageSizeSelect value={pageSize} options={PAGE_SIZE_OPTIONS} onChange={setPageSize} />
           {data && (
-            <NeoBadge accent="bg-cyan" variant="flat">
-              {data.count} image{data.count !== 1 ? 's' : ''}
+            <NeoBadge>
+              {data.count} IMAGE{data.count !== 1 ? 'S' : ''}
             </NeoBadge>
           )}
         </div>
       </div>
 
       {isLoading && (
-        <NeoCard accent="bg-cyan" className="p-5 sm:p-6 font-bold text-sm">
-          <span className="uppercase tracking-wide">Loading...</span>
-        </NeoCard>
+        <div className="border-2 border-brutal-black bg-white shadow-base rounded-base p-6 sm:p-8 font-bold text-sm uppercase tracking-widest text-brutal-black mb-12 animate-pulse">
+          LOADING IMAGES...
+        </div>
       )}
 
       {error && (
-        <NeoCard accent="bg-pink" className="p-5 sm:p-6 font-bold text-sm">
-          <span className="uppercase tracking-wide text-base block mb-1">Failed to load</span>
+        <div className="border-2 border-brutal-black bg-red-500 shadow-base rounded-base p-6 sm:p-8 font-bold text-sm text-white mb-12">
+          <span className="uppercase tracking-widest text-base block mb-2">ACCESS FAILURE</span>
           {error.message}
-        </NeoCard>
+        </div>
       )}
 
       {data && data.items.length === 0 && (
-        <NeoCard
-          variant="layered"
-          accent="bg-yellow"
-          offset={2.5}
-          offsetAccent="bg-cyan"
-          className="max-w-md mx-auto mt-12"
-          contentClassName="py-10 px-6 text-center"
-        >
-          <p className="text-5xl mb-4">🖼️</p>
-          <p className="text-xl sm:text-2xl font-bold uppercase tracking-tight mb-2">
-            {tag ? `No images with tag "${tag}"` : 'No images yet!'}
-          </p>
-          <div className="border-t-2 border-gray-800 my-4" />
-          <p className="font-bold text-sm text-gray-600 mb-6">
+        <NeoCard shadow={4} className="max-w-xl mx-auto mt-16 text-center" contentClassName="p-10">
+          <p className="text-6xl mb-6">🖼️</p>
+          <h2 className="text-3xl sm:text-4xl font-bold uppercase tracking-tighter text-brutal-black mb-4">
+            {tag ? 'NO MATCHES' : 'NO IMAGES YET'}
+          </h2>
+          <div className="border-t-2 border-brutal-black my-6 w-16 mx-auto" />
+          <p className="font-bold text-sm sm:text-base text-gray-600 uppercase tracking-widest mb-8">
             {tag
-              ? 'Try a different tag or clear the filter.'
+              ? `No images with tag "${tag}". Try a different tag.`
               : 'Upload some images to get started.'}
           </p>
           {tag ? (
-            <NeoButton variant="black" onClick={() => setTag(null)}>
-              Clear filter
+            <NeoButton variant="brutal-black" onClick={() => setTag(null)}>
+              CLEAR FILTER
             </NeoButton>
           ) : (
-            <NeoButton variant="black" onClick={() => navigate('/upload')}>
-              Upload Images →
+            <NeoButton variant="brutal-black" onClick={() => navigate('/upload')}>
+              UPLOAD IMAGES →
             </NeoButton>
           )}
         </NeoCard>
@@ -223,17 +217,23 @@ export function GalleryPage() {
         />
       )}
 
-      <Modal open={!!editTarget} onClose={() => setEditTarget(null)} title="Edit Image">
+      <Modal open={!!editTarget} onClose={() => setEditTarget(null)} title="EDIT IMAGE">
         {editTarget && (
-          <div className="flex flex-col gap-4">
-            <NeoInput label="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                Tags
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold uppercase tracking-widest text-brutal-black">
+                IMAGE NAME
               </label>
-              <div className="flex gap-2">
+              <NeoInput value={editName} onChange={(e) => setEditName(e.target.value)} />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold uppercase tracking-widest text-brutal-black">
+                SEMANTIC TAGS
+              </label>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <NeoInput
-                  placeholder="Add tag..."
+                  placeholder="ADD TAG..."
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -244,12 +244,12 @@ export function GalleryPage() {
                   }}
                   className="flex-1 min-w-0"
                 />
-                <NeoButton variant="lime" onClick={addTag}>
-                  Add
+                <NeoButton variant="brutal-black" onClick={addTag}>
+                  ADD
                 </NeoButton>
               </div>
               {editTags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-1">
+                <div className="flex flex-wrap gap-2 mt-2">
                   {editTags.map((tag) => (
                     <NeoTag
                       key={tag}
@@ -260,34 +260,50 @@ export function GalleryPage() {
                 </div>
               )}
             </div>
-            <div className="flex gap-3 pt-2">
-              <NeoButton variant="yellow" onClick={saveEdit} disabled={saving} className="flex-1">
-                {saving ? 'Saving...' : 'Save'}
+
+            <div className="border-t-2 border-brutal-black my-1" />
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-1">
+              <NeoButton
+                variant="brutal-yellow"
+                onClick={saveEdit}
+                disabled={saving}
+                className="flex-1"
+              >
+                {saving ? 'SAVING...' : 'SAVE CHANGES'}
               </NeoButton>
-              <NeoButton variant="white" onClick={() => setEditTarget(null)}>
-                Cancel
+              <NeoButton
+                variant="brutal-white"
+                onClick={() => setEditTarget(null)}
+                className="flex-1"
+              >
+                CANCEL
               </NeoButton>
             </div>
           </div>
         )}
       </Modal>
 
-      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="Delete Image">
-        <div className="flex flex-col gap-4">
-          <p className="font-bold text-sm">
-            Are you sure you want to delete this image? This cannot be undone.
+      <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="DELETE IMAGE">
+        <div className="flex flex-col gap-6">
+          <p className="font-bold text-sm text-brutal-black">
+            Are you sure you want to delete this entry? This action cannot be reversed.
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <NeoButton
-              variant="pink"
+              variant="brutal-black"
               onClick={confirmDelete}
               disabled={deleting}
               className="flex-1"
             >
-              {deleting ? 'Deleting...' : 'Delete'}
+              {deleting ? 'DELETING...' : 'DELETE'}
             </NeoButton>
-            <NeoButton variant="white" onClick={() => setDeleteTarget(null)}>
-              Cancel
+            <NeoButton
+              variant="brutal-white"
+              onClick={() => setDeleteTarget(null)}
+              className="flex-1"
+            >
+              CANCEL
             </NeoButton>
           </div>
         </div>

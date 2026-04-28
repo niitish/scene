@@ -1,34 +1,26 @@
 import type { ReactNode } from 'react'
 
+export type BadgeVariant = 'brutal-yellow' | 'brutal-black' | 'brutal-white'
+
 export interface NeoBadgeProps {
   children: ReactNode
-  accent?: string
-  variant?: 'default' | 'flat'
-  rotate?: -1 | 0 | 1
+  variant?: BadgeVariant
   className?: string
 }
 
-const rotateClasses: Record<number, string> = {
-  [-1]: '-rotate-1',
-  0: '',
-  1: 'rotate-1',
+const variantClasses: Record<BadgeVariant, string> = {
+  'brutal-yellow': 'bg-brutal-yellow text-brutal-black',
+  'brutal-black': 'bg-brutal-black text-white',
+  'brutal-white': 'bg-white text-brutal-black',
 }
 
-export function NeoBadge({
-  children,
-  accent = 'bg-cyan',
-  variant = 'default',
-  rotate = 0,
-  className = '',
-}: NeoBadgeProps) {
+export function NeoBadge({ children, variant = 'brutal-yellow', className = '' }: NeoBadgeProps) {
   return (
     <span
       className={`
-        inline-block border-2 border-gray-800
-        font-bold text-xs uppercase tracking-widest px-3 py-1.5
-        ${variant === 'default' ? 'shadow-[2px_2px_0px_#1f2937]' : ''}
-        ${accent}
-        ${rotateClasses[rotate]}
+        inline-flex items-center justify-center border-2 border-brutal-black
+        font-bold text-xs uppercase tracking-widest px-3 py-1.5 rounded-base
+        ${variantClasses[variant]}
         ${className}
       `.trim()}
     >

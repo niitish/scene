@@ -22,9 +22,9 @@ function tagColor(label: string) {
 export function NeoTag({ label, onRemove, onClick }: Props) {
   const className = `
     inline-flex items-center gap-1
-    border border-gray-600
+    border-2 border-brutal-black rounded-base
     px-2 py-0.5
-    text-xs font-medium tracking-wide
+    text-xs font-bold tracking-wide
     ${tagColor(label)}
     ${onClick ? 'cursor-pointer hover:brightness-95' : ''}
   `

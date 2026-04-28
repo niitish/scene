@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams, Link } from 'react-router'
 import { githubLoginUrl, googleLoginUrl } from '@/api/client'
 import { useAuth } from '@/use-auth'
 import { GitHubIcon, GoogleIcon } from '@/components/icons'
-import { NeoBadge } from '@/components/neo-badge'
 import { NeoButton } from '@/components/neo-button'
+import { NeoBadge } from '@/components/neo-badge'
 import { NeoCard } from '@/components/neo-card'
 
 const errorMessages: Record<string, string> = {
@@ -12,17 +12,6 @@ const errorMessages: Record<string, string> = {
   oauth_failed: 'OAuth login failed. Please try again.',
   access_denied: 'Access was denied.',
 }
-
-const ACCENT_BLOCKS = [
-  { color: 'bg-yellow', rotate: '-rotate-2', top: '7%', left: '4%', w: 'w-28', h: 'h-10' },
-  { color: 'bg-pink', rotate: 'rotate-3', top: '12%', right: '6%', w: 'w-16', h: 'h-16' },
-  { color: 'bg-cyan', rotate: '-rotate-1', bottom: '22%', left: '7%', w: 'w-24', h: 'h-8' },
-  { color: 'bg-lime', rotate: 'rotate-2', bottom: '8%', right: '5%', w: 'w-16', h: 'h-16' },
-  { color: 'bg-orange', rotate: '-rotate-3', top: '48%', left: '2%', w: 'w-10', h: 'h-10' },
-  { color: 'bg-purple', rotate: 'rotate-1', top: '62%', right: '3%', w: 'w-14', h: 'h-6' },
-  { color: 'bg-yellow', rotate: 'rotate-6', bottom: '35%', right: '10%', w: 'w-8', h: 'h-8' },
-  { color: 'bg-cyan', rotate: '-rotate-6', top: '30%', left: '14%', w: 'w-6', h: 'h-6' },
-]
 
 export function LoginPage() {
   const { user, loading } = useAuth()
@@ -37,71 +26,56 @@ export function LoginPage() {
   }, [user, loading, navigate])
 
   return (
-    <div className="min-h-screen page-bg flex items-center justify-center px-4 overflow-hidden relative">
-      {ACCENT_BLOCKS.map((b, i) => (
-        <div
-          key={i}
-          className={`absolute border border-gray-800 ${b.color} ${b.rotate} ${b.w} ${b.h} shadow-[2px_2px_0px_rgba(31,41,55,0.3)]`}
-          style={{ top: b.top, bottom: b.bottom, left: b.left, right: b.right }}
-        />
-      ))}
-
-      <div className="w-full max-w-sm relative z-10">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-5">
-            <NeoBadge
-              accent="bg-gray-800"
-              rotate={-1}
-              className="text-yellow shadow-[3px_3px_0px_#f0d84a]"
-            >
-              Image Gallery
-            </NeoBadge>
-          </div>
-          <h1 className="text-gray-800 text-7xl font-extrabold uppercase tracking-tighter leading-none">
-            SCENE
-          </h1>
-          <div className="flex items-center gap-3 mt-3">
-            <div className="h-0.5 w-8 bg-gray-800" />
-            <p className="text-gray-600 font-bold text-xs uppercase tracking-widest">
-              Sign in to continue
-            </p>
-          </div>
+    <div className="min-h-screen page-bg flex items-center justify-center p-4">
+      <NeoCard shadow={4} className="w-full max-w-md" contentClassName="p-8 sm:p-12">
+        <div className="mb-12">
+          <Link to="/" className="block w-fit mb-4">
+            <h1 className="text-brutal-black text-6xl sm:text-7xl font-black uppercase tracking-tighter leading-none">
+              SCENE
+            </h1>
+          </Link>
+          <NeoBadge variant="brutal-black" className="text-brutal-yellow! text-sm! sm:text-base!">
+            LOG IN
+          </NeoBadge>
         </div>
 
-        <NeoCard
-          variant="layered"
-          accent="bg-white"
-          offset={2.5}
-          offsetAccent="bg-cyan"
-          contentClassName="p-8 flex flex-col gap-4"
-        >
-          {error && (
-            <NeoCard
-              variant="flat"
-              accent="bg-pink"
-              border={2}
-              className="px-4 py-3 text-sm font-bold flex items-center gap-2"
-            >
-              <span className="text-base leading-none shrink-0">⚠</span>
-              <span>{errorMessages[error] ?? 'Something went wrong. Please try again.'}</span>
-            </NeoCard>
-          )}
+        {error && (
+          <div className="mb-8 border-2 border-brutal-black bg-brutal-yellow px-5 py-4 text-sm sm:text-base font-bold uppercase tracking-tight text-brutal-black flex items-start gap-3 rounded-base shadow-base">
+            <span className="text-xl leading-none mt-0.5">⚠</span>
+            <span>{errorMessages[error] ?? 'Something went wrong. Please try again.'}</span>
+          </div>
+        )}
 
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-600 text-center">
-            Choose a provider
-          </p>
-
-          <NeoButton href={googleLoginUrl()} variant="white" display fullWidth className="gap-3">
+        <div className="space-y-4">
+          <NeoButton
+            href={googleLoginUrl()}
+            variant="brutal-white"
+            display
+            fullWidth
+            className="gap-3 justify-center"
+          >
             <GoogleIcon />
-            Continue with Google
+            CONTINUE WITH GOOGLE
           </NeoButton>
 
-          <NeoButton href={githubLoginUrl()} variant="black" display fullWidth className="gap-3">
+          <NeoButton
+            href={githubLoginUrl()}
+            variant="brutal-black"
+            display
+            fullWidth
+            className="gap-3 justify-center"
+          >
             <GitHubIcon />
-            Continue with GitHub
+            CONTINUE WITH GITHUB
           </NeoButton>
-        </NeoCard>
-      </div>
+        </div>
+
+        <div className="mt-12 pt-6 border-t-2 border-brutal-black">
+          <p className="text-brutal-black font-bold text-xs uppercase tracking-widest text-center">
+            CHOOSE A PROVIDER
+          </p>
+        </div>
+      </NeoCard>
     </div>
   )
 }

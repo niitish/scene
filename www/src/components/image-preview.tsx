@@ -31,34 +31,38 @@ export function ImagePreview({ image, onClose, onViewSimilar, onTagClick }: Prop
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
-      style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}
+      style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
       onClick={onClose}
     >
       <NeoCard
-        accent="bg-white"
-        shadow={6}
-        className="w-full sm:max-w-4xl max-h-[92dvh] flex flex-col overflow-hidden"
+        shadow={12}
+        className="w-full sm:max-w-5xl max-h-[95dvh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3 bg-yellow/60 shrink-0">
-          <h2 className="font-semibold text-sm truncate pr-3">{image.name}</h2>
-          <NeoButton variant="black" size="sm" onClick={onClose}>
+        <div className="flex items-center justify-between border-b-[3px] border-brutal-black px-5 py-4 bg-brutal-yellow shrink-0">
+          <h2 className="font-bold text-sm uppercase tracking-widest truncate pr-3">
+            {image.name}
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-xl hover:text-white transition-colors cursor-pointer"
+          >
             ✕
-          </NeoButton>
+          </button>
         </div>
 
-        <div className="flex-1 overflow-hidden bg-gray-100 flex items-center justify-center min-h-0">
+        <div className="flex-1 overflow-hidden bg-brutal-stone flex items-center justify-center min-h-0 border-b-[3px] border-brutal-black">
           <img
             src={imageUrl(image.id)}
             alt={image.name}
             className="max-w-full max-h-full object-contain"
-            style={{ maxHeight: 'calc(92dvh - 110px)' }}
+            style={{ maxHeight: 'calc(95dvh - 150px)' }}
           />
         </div>
 
-        <div className="border-t border-gray-800 px-4 py-3 shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div className="bg-white px-5 py-4 shrink-0 flex flex-col sm:flex-row items-start sm:items-center gap-4">
           {image.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 flex-1">
+            <div className="flex flex-wrap gap-2 flex-1">
               {image.tags.map((tag) => (
                 <NeoTag
                   key={tag}
@@ -68,18 +72,17 @@ export function ImagePreview({ image, onClose, onViewSimilar, onTagClick }: Prop
               ))}
             </div>
           )}
-          <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
+          <div className="flex gap-4 w-full sm:w-auto sm:ml-auto">
             {onViewSimilar && (
               <NeoButton
-                variant="cyan"
-                size="sm"
-                className="flex-1 sm:flex-none"
+                variant="brutal-yellow"
+                className="flex-1 sm:flex-none px-8 py-2 text-xs uppercase tracking-widest shadow-[4px_4px_0px_var(--color-brutal-black)]"
                 onClick={() => {
                   onViewSimilar(image.id)
                   onClose()
                 }}
               >
-                Find Similar
+                FIND SIMILAR
               </NeoButton>
             )}
             <NeoButton
@@ -87,11 +90,10 @@ export function ImagePreview({ image, onClose, onViewSimilar, onTagClick }: Prop
               download={image.name}
               target="_blank"
               rel="noreferrer"
-              variant="lime"
-              size="sm"
-              className="flex-1 sm:flex-none"
+              variant="brutal-white"
+              className="flex-1 sm:flex-none px-8 py-2 text-xs uppercase tracking-widest shadow-[4px_4px_0px_var(--color-brutal-black)]"
             >
-              Download
+              DOWNLOAD
             </NeoButton>
           </div>
         </div>

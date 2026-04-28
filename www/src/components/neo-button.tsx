@@ -1,6 +1,16 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react'
 
-type ColorVariant = 'yellow' | 'pink' | 'cyan' | 'lime' | 'orange' | 'white' | 'black'
+type ColorVariant =
+  | 'yellow'
+  | 'pink'
+  | 'cyan'
+  | 'lime'
+  | 'orange'
+  | 'white'
+  | 'black'
+  | 'brutal-yellow'
+  | 'brutal-white'
+  | 'brutal-black'
 
 type Size = 'xs' | 'sm' | 'md' | 'lg'
 
@@ -21,42 +31,29 @@ type Props = BaseProps &
   )
 
 const variantClasses: Record<ColorVariant, string> = {
-  yellow: 'bg-yellow text-gray-800 hover:brightness-95',
-  pink: 'bg-pink text-gray-800 hover:brightness-95',
-  cyan: 'bg-cyan text-gray-800 hover:brightness-95',
-  lime: 'bg-lime text-gray-800 hover:brightness-95',
-  orange: 'bg-orange text-white hover:brightness-95',
+  yellow: 'bg-yellow text-gray-800',
+  pink: 'bg-pink text-gray-800',
+  cyan: 'bg-cyan text-gray-800',
+  lime: 'bg-lime text-gray-800',
+  orange: 'bg-orange text-white',
   white: 'bg-white text-gray-800 hover:bg-gray-50',
   black: 'bg-gray-800 text-white hover:bg-gray-700',
-}
-
-const displayVariantClasses: Record<ColorVariant, string> = {
-  yellow: 'bg-yellow text-gray-800 hover:brightness-95',
-  pink: 'bg-pink text-gray-800 hover:brightness-95',
-  cyan: 'bg-cyan text-gray-800 hover:brightness-95',
-  lime: 'bg-lime text-gray-800 hover:brightness-95',
-  orange: 'bg-orange text-white hover:brightness-95',
-  white: 'bg-white text-gray-800 hover:bg-yellow',
-  black: 'bg-gray-800 text-white hover:bg-gray-700',
+  'brutal-yellow': 'bg-brutal-yellow text-brutal-black',
+  'brutal-white': 'bg-white text-brutal-black hover:bg-gray-100',
+  'brutal-black': 'bg-brutal-black text-white hover:opacity-90',
 }
 
 const sizeClasses: Record<Size, string> = {
-  xs: 'px-2 py-1 text-[11px] font-semibold',
-  sm: 'px-3 py-1.5 text-sm font-semibold',
-  md: 'px-5 py-2.5 text-sm font-semibold',
-  lg: 'px-7 py-3.5 text-base font-semibold',
+  xs: 'px-2 py-1 text-[11px] font-bold',
+  sm: 'px-3 py-1.5 text-xs font-bold',
+  md: 'px-5 py-2.5 text-sm font-bold',
+  lg: 'px-7 py-3.5 text-base font-bold',
 }
 
-const displaySizeClasses = 'px-5 py-3.5 font-bold text-sm uppercase tracking-wide'
+const displaySizeClasses = 'px-6 py-4 font-extrabold text-sm uppercase tracking-widest'
 
 const baseClasses =
-  'inline-flex items-center justify-center gap-2 transition-all duration-75 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed'
-
-const defaultButtonClasses =
-  'border border-gray-800 shadow-[3px_3px_0px_#1f2937] active:shadow-none active:translate-x-[3px] active:translate-y-[3px] disabled:active:shadow-[3px_3px_0px_#1f2937] disabled:active:translate-x-0 disabled:active:translate-y-0'
-
-const displayButtonClasses =
-  'border-2 border-gray-800 shadow-[4px_4px_0px_#1f2937] hover:shadow-[2px_2px_0px_#1f2937] hover:translate-x-[2px] hover:translate-y-[2px] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] disabled:hover:shadow-[4px_4px_0px_#1f2937] disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:active:translate-x-0 disabled:active:translate-y-0'
+  'inline-flex items-center justify-center gap-2 transition-all duration-75 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed rounded-base border-2 border-brutal-black shadow-base active:shadow-none active:translate-x-[4px] active:translate-y-[4px] disabled:active:shadow-base disabled:active:translate-x-0 disabled:active:translate-y-0'
 
 export function NeoButton({
   variant = 'yellow',
@@ -70,18 +67,10 @@ export function NeoButton({
   ...props
 }: Props) {
   const isAnchor = typeof href === 'string'
-  const colorClasses = display ? displayVariantClasses[variant] : variantClasses[variant]
+  const colorClasses = variantClasses[variant]
   const sizeClass = display ? displaySizeClasses : sizeClasses[size]
-  const shadowClasses = display ? displayButtonClasses : defaultButtonClasses
 
-  const classes = [
-    baseClasses,
-    shadowClasses,
-    colorClasses,
-    sizeClass,
-    fullWidth && 'w-full',
-    className,
-  ]
+  const classes = [baseClasses, colorClasses, sizeClass, fullWidth && 'w-full', className]
     .filter(Boolean)
     .join(' ')
 

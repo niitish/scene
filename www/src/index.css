@@ -1,20 +1,24 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-white: #ffffff;
-  --color-yellow: #f0d84a;
-  --color-pink: #f472a8;
-  --color-cyan: #22d3ee;
-  --color-lime: #a3e635;
-  --color-orange: #fb923c;
-  --color-purple: #a78bfa;
-  --color-bg: #f7f4ef;
+  --color-yellow: #eab308;
+  --color-pink: #ec4899;
+  --color-cyan: #06b6d4;
+  --color-lime: #84cc16;
+  --color-orange: #f97316;
+  --color-bg: #fafafa;
   --color-surface: #ffffff;
-  --color-border: #1f2937;
-  --color-muted: #99a1af;
+  --color-border: #111827;
+  --color-muted: #6b7280;
+  --color-brutal-yellow: #facc15;
+  --color-brutal-stone: #f3f4f6;
+  --color-brutal-black: #09090b;
 
   --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   --font-family-sans: 'Inter', system-ui, sans-serif;
+
+  --radius-base: 5px;
+  --shadow-base: 4px 4px 0px 0px rgba(0, 0, 0, 1);
 }
 
 * {
@@ -32,9 +36,11 @@ body {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--color-bg);
 }
+
 ::-webkit-scrollbar-thumb {
   background: #aaa;
   border-radius: 3px;
@@ -43,7 +49,7 @@ body {
 .page-bg {
   background-color: var(--color-bg);
   background-image:
-    linear-gradient(#1f29370d 1px, transparent 1px),
-    linear-gradient(90deg, #1f29370d 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(#09090b14 1px, transparent 1px),
+    linear-gradient(90deg, #09090b14 1px, transparent 1px);
+  background-size: 64px 64px;
 }

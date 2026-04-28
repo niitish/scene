@@ -4,6 +4,7 @@ import type { ImageMeta, ImageWithSimilarity } from '@/api/types'
 import { NeoButton } from '@/components/neo-button'
 import { NeoCard } from '@/components/neo-card'
 import { NeoTag } from '@/components/neo-tag'
+import { NeoBadge } from '@/components/neo-badge'
 
 interface Props {
   image: ImageMeta | ImageWithSimilarity
@@ -110,9 +111,9 @@ export function ImageCard({
   const isOwner = isAdmin || (currentUserId != null && image.uploaded_by === currentUserId)
 
   return (
-    <NeoCard accent="bg-white" className="flex flex-col group">
+    <NeoCard accent="bg-white" className="flex flex-col group" contentClassName="flex flex-col">
       <div
-        className="relative overflow-hidden border-b border-gray-800 bg-gray-100 cursor-pointer"
+        className="relative overflow-hidden border-b-2 border-brutal-black bg-gray-100 cursor-pointer rounded-t-[3px]"
         style={{ aspectRatio: '4/3' }}
         onClick={() => onPreview?.(image)}
       >
@@ -131,47 +132,51 @@ export function ImageCard({
           </div>
         )}
         {isSimilar(image) && (
-          <div className="absolute top-2 right-2 bg-lime/90 border border-gray-800 px-2 py-0.5 text-xs font-semibold">
-            {(image.similarity * 100).toFixed(1)}%
-          </div>
+          <NeoBadge variant="brutal-yellow" className="absolute top-2 right-2 ">
+            {(image.similarity * 100).toFixed(1)}% MATCH
+          </NeoBadge>
         )}
       </div>
 
-      <div className="p-3 flex flex-col gap-2 flex-1">
-        <p className="font-semibold text-sm truncate text-gray-800" title={image.name}>
+      <div className="p-4 flex flex-col gap-3 flex-1 bg-white">
+        <p
+          className="font-bold text-sm uppercase tracking-widest truncate text-brutal-black"
+          title={image.name}
+        >
           {image.name}
         </p>
 
         <TagRow tags={image.tags} onTagClick={onTagClick} />
 
-        <p className="text-xs text-muted font-mono mt-auto">
-          {new Date(image.created_at).toLocaleDateString()}
-        </p>
-
-        <div className="flex gap-1.5 mt-auto">
+        <div className="flex gap-1.5 flex-wrap sm:flex-nowrap mt-auto">
           {onViewSimilar && (
             <NeoButton
-              variant="cyan"
+              variant="brutal-white"
               size="xs"
-              className="flex-1"
+              className="flex-1 px-1! py-1! font-bold text-[10px]! uppercase tracking-tight! min-w-0!"
               onClick={() => onViewSimilar(image.id)}
             >
-              Similar
+              SIMILAR
             </NeoButton>
           )}
           {onEdit && isOwner && (
-            <NeoButton variant="yellow" size="xs" className="flex-1" onClick={() => onEdit(image)}>
-              Edit
+            <NeoButton
+              variant="brutal-yellow"
+              size="xs"
+              className="flex-1 px-1! py-1! font-bold text-[10px]! uppercase tracking-tight! min-w-0!"
+              onClick={() => onEdit(image)}
+            >
+              EDIT
             </NeoButton>
           )}
           {onDelete && isOwner && (
             <NeoButton
-              variant="pink"
+              variant="brutal-black"
               size="xs"
-              className="flex-1"
+              className="flex-1 px-1! py-1! font-bold text-[10px]! uppercase tracking-tight! min-w-0!"
               onClick={() => onDelete(image.id)}
             >
-              Delete
+              DELETE
             </NeoButton>
           )}
         </div>
